@@ -7,7 +7,7 @@
 
 ## Profile
 
-Mathematician who builds the data layer of credit risk: the pipelines that keep the data reliable and the models, provisions and policies calculated on top of them. More than six years in regulated financial institutions, across both expected credit loss frameworks, IFRS 9 and the CNBV regulatory methodology, in analytics consulting, consumer credit and fintech.
+Mathematician who builds the data layer of credit risk: the pipelines that keep the data reliable and the models, provisions and policies calculated on top of them. More than six years in credit risk and data, more than five of them in regulated financial institutions, working with IFRS 9, CECL and the CNBV regulatory methodology, in analytics consulting, consumer credit and fintech.
 
 ## Work Experience
 
@@ -18,9 +18,9 @@ Fintech providing credit to neighborhood stores in Mexico through their distribu
 - Led the implementation of AI voice agents for debt collection, from the initial pilot to an automated daily process with its own dashboard.
 - Designed the credit line decrement policy, presented it to the risk committee and built the module that applies it in the decision API.
 
-### Stori — Digital bank in Mexico offering credit cards, personal loans and deposits (Oct 2024 – Apr 2026)
+### Stori (Oct 2024 – Apr 2026)
 
-Digital bank in Mexico offering credit cards, personal loans and deposits.
+SOFIPO in Mexico offering credit cards, personal loans and deposits.
 
 #### Principal Data Analytics Engineer (Aug 2025 – Apr 2026)
 
