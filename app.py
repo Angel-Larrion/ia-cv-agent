@@ -1,11 +1,16 @@
+import hmac
 import json
 import os
 import time
 import uuid
 
 from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
+
+import agente
+import rag
 
 API_KEY = os.environ.get("AGENT_API_KEY", "")
 MODEL = "angel-larrion-cv-agent"
@@ -14,9 +19,25 @@ app = FastAPI(title="CV agent")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
+def precalentar():
+    """Carga el prompt y el índice al arrancar: si algo falla, se ve en los logs de inmediato."""
+    if not API_KEY:
+        agente.registrar("arranque_sin_clave", aviso="AGENT_API_KEY no está definida: el endpoint rechaza todas las peticiones")
+    try:
+        agente.cargar_textos()
+        rag.cargar_indice()
+    except Exception as e:
+        agente.registrar("arranque_fallo", error=f"{type(e).__name__}: {e}"[:200])
+
+
+precalentar()
+
+
 def check_auth(authorization):
-    # Sin AGENT_API_KEY definida no se valida (solo para desarrollo local)
-    if API_KEY and authorization != f"Bearer {API_KEY}":
+    # Sin AGENT_API_KEY el endpoint se cierra: nunca queda abierto por omisión
+    if not API_KEY:
+        raise HTTPException(503, "Server misconfigured: AGENT_API_KEY is not set")
+    if not hmac.compare_digest((authorization or "").encode(), f"Bearer {API_KEY}".encode()):
         raise HTTPException(401, "Invalid or missing API key")
 
 
@@ -25,20 +46,19 @@ def parse_input(body):
     raw = body.get("input", "")
     if isinstance(raw, str):
         return [("user", raw)]
+    if not isinstance(raw, list):
+        return []
     messages = []
     for item in raw:
         if not isinstance(item, dict) or item.get("type", "message") != "message":
             continue
         content = item.get("content", "")
         if isinstance(content, list):
-            content = "".join(p.get("text", "") for p in content if isinstance(p, dict))
+            content = "".join(
+                p["text"] for p in content if isinstance(p, dict) and isinstance(p.get("text"), str)
+            )
         messages.append((item.get("role", "user"), content))
     return messages
-
-
-def generate(messages, instructions):
-    # Pendiente: sustituir por RAG + Gemini
-    return "Hola, soy el agente de Angel Larrion. La conexion funciona."
 
 
 def response_object(resp_id, created, text, status, body):
@@ -155,7 +175,9 @@ async def create_response(request: Request, authorization: str | None = Header(d
     if not isinstance(body, dict):
         raise HTTPException(400, "Body must be a JSON object")
 
-    text = generate(parse_input(body), body.get("instructions"))
+    # agente.responder espera a la red: en un hilo aparte para no bloquear a otros usuarios.
+    # El campo `instructions` del cliente se ignora a propósito.
+    text = await run_in_threadpool(agente.responder, parse_input(body))
 
     if body.get("stream"):
         return StreamingResponse(stream(text, body), media_type="text/event-stream")
