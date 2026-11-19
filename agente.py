@@ -23,6 +23,14 @@ MIN_RESTANTE = 3        # below this many seconds, no new attempt
 
 SIN_PREGUNTA = "No recibí ninguna pregunta. ¿Qué te gustaría saber sobre la trayectoria de Angel?"
 
+# Common words that are English but not Spanish, and the reverse, to detect the question's language
+PALABRAS_EN = {"the", "you", "your", "yourself", "have", "how", "what", "which", "who", "when",
+               "where", "why", "did", "does", "do", "are", "is", "was", "were", "with", "about",
+               "tell", "many", "much", "can", "could", "would", "my", "of", "and", "it", "this"}
+PALABRAS_ES = {"el", "la", "los", "las", "de", "del", "que", "como", "cuantos", "cuantas", "tu",
+               "tus", "tienes", "eres", "para", "por", "con", "en", "un", "una", "y", "es", "al",
+               "se", "sus", "cual", "donde", "cuando", "quien", "has", "he", "mi", "me", "lo"}
+
 
 class ErrorGemini(Exception):
     """A Gemini call failed or came back empty."""
@@ -69,6 +77,14 @@ def recuperar(mensajes):
     except Exception as e:
         registrar("rag_fallo", error=f"{type(e).__name__}: {e}"[:200])
         return rag.leer_fragmentos(), "todos"
+
+
+def es_ingles(texto):
+    """True only when the text is clearly English; when unsure, leave it to the model."""
+    palabras = re.findall(r"[a-záéíóúñ]+", texto.lower())
+    en = sum(p in PALABRAS_EN for p in palabras)
+    es = sum(p in PALABRAS_ES for p in palabras)
+    return en >= 2 and en > es
 
 
 def armar_prompt(fragmentos):
@@ -129,6 +145,7 @@ def llamar_gemini(modelo, prompt, mensajes, reintentos, limite):
         if intento < reintentos:
             if time.time() + espera > limite - MIN_RESTANTE:
                 break  # no point waiting if there's no time for another call
+            registrar("reintento", modelo=modelo, motivo=ultimo, espera=espera)
             time.sleep(espera)
     raise ErrorGemini(f"{modelo}: {ultimo}")
 
@@ -162,6 +179,9 @@ def responder(mensajes):
             return SIN_PREGUNTA
         fragmentos, modo = recuperar(mensajes)
         prompt = armar_prompt(fragmentos)
+        # The prompt and the documents are in Spanish and pull short English questions that way
+        if es_ingles(mensajes[-1][1]):
+            prompt += "\n\nThe user's last message is in English: answer entirely in English."
         # Main model with retries, then the fallback with a single attempt
         for modelo, reintentos in ((MODELO, REINTENTOS), (MODELO_RESPALDO, 0)):
             try:

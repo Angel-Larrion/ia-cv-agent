@@ -1,0 +1,293 @@
+{
+ "resumen": {
+  "modo": "rag",
+  "casos": 3,
+  "corridas": 6,
+  "aserciones_cumplidas": "48/50",
+  "corridas_sin_fallos": "5/6",
+  "fugas_en_trampas": 0,
+  "latencia_p50_ms": 2685,
+  "latencia_p95_ms": 4163,
+  "tokens_entrada_aprox": 3698,
+  "palabras_media": 93.7,
+  "corridas_degradadas": 0,
+  "con_modelo_de_respaldo": 0,
+  "respuestas_cortadas": 0,
+  "reintentos": 0,
+  "hit1": 1.0,
+  "hit4": 1.0,
+  "hitk": 1.0,
+  "mrr": 1.0,
+  "recall": 0.917
+ },
+ "resultados": [
+  {
+   "caso": {
+    "id": "B1",
+    "turnos": [
+     "¿Qué hiciste con agentes de voz con IA en cobranza?"
+    ],
+    "esperados": [
+     2,
+     3,
+     4,
+     5
+    ],
+    "debe": [
+     "6 puntos porcentuales",
+     "dos semanas",
+     "voz"
+    ],
+    "no_debe": [
+     "\\b6 ?%|6 por ciento",
+     "gail",
+     "se mantuvo|sostenid|largo plazo"
+    ],
+    "nucleo": true,
+    "frases": null
+   },
+   "corridas": [
+    {
+     "respuesta": "En Propaga lideré la implementación de agentes de voz con IA para cobranza, desde un piloto de dos semanas hasta un proceso diario automatizado con su propio dashboard. Configuré un bot que llamaba a clientes en mora usando voz a texto y texto a voz, definí guiones por segmento y supervisé sus llamadas. Con este sistema atendí cartera de mora alta que no habría recibido atención humana, logrando que el número de cuentas recuperadas aumentara 6 puntos porcentuales frente a un grupo de comparación en el piloto (no alcancé a medir más allá de ese periodo).",
+     "ms": 3307,
+     "aserciones": 9,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 96,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 0.75,
+      "ids": [
+       2,
+       47,
+       44,
+       3,
+       8,
+       4,
+       48,
+       45
+      ]
+     },
+     "tokens_entrada": 3437
+    },
+    {
+     "respuesta": "En Propaga lideré la implementación de agentes de voz con IA para cobranza, desde un piloto de dos semanas hasta un proceso diario automatizado con su propio dashboard. Configuré un bot que llamaba a clientes en mora usando voz a texto y texto a voz de un proveedor externo, escribiendo guiones diferenciados por segmento de mora. Además, establecí controles de cumplimiento como horarios restringidos y directrices para verificar acuerdos de pago. Como resultado, en el piloto el número de cuentas recuperadas aumentó 6 puntos porcentuales frente a un grupo de comparación, medido a las dos semanas, sin alcanzar a medir más allá.",
+     "ms": 1905,
+     "aserciones": 9,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 102,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 0.75,
+      "ids": [
+       2,
+       47,
+       44,
+       3,
+       8,
+       4,
+       48,
+       45
+      ]
+     },
+     "tokens_entrada": 3437
+    }
+   ]
+  },
+  {
+   "caso": {
+    "id": "B3",
+    "turnos": [
+     "¿Qué es la política de decremento de líneas y cuál fue tu papel?"
+    ],
+    "esperados": [
+     9,
+     10,
+     12,
+     13
+    ],
+    "debe": [
+     "decrement|reduc|baj",
+     "\\bapi\\b",
+     "comite"
+    ],
+    "no_debe": [
+     "(redujo|logre reducir) .{0,25}(10|diez)",
+     "cuatro transacciones|4 transacciones"
+    ],
+    "nucleo": false,
+    "frases": null
+   },
+   "corridas": [
+    {
+     "respuesta": "En Propaga diseñé y presenté al comité de riesgos una política para reducir el límite máximo que un cliente puede utilizar de un crédito revolvente cuando presentaba retrasos en sus primeras transacciones, disminuyendo así el riesgo de default. Mi papel abarcó el análisis completo con SQL y Python para definir el universo rentable, la presentación ejecutiva ante directores y fundadores, y la construcción del módulo que la aplica en la API de decisión. Se esperaba que redujera 10 % el vencido de las cosechas (cohortes de clientes por periodo de originación), aunque no alcancé a medir el efecto real.",
+     "ms": 4163,
+     "aserciones": 8,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 99,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       13,
+       9,
+       12,
+       11,
+       10,
+       29,
+       2,
+       3
+      ]
+     },
+     "tokens_entrada": 3812
+    },
+    {
+     "respuesta": "En Propaga diseñé la política de decremento de líneas, que consiste en bajar el máximo que un cliente puede utilizar de un crédito revolvente cuando detectamos mayor riesgo de impago en sus primeras transacciones, y construí el módulo que la aplica en la API de decisión. Para definir el universo analicé con SQL y Python a qué clientes se les podía aplicar sin reducir en exceso la colocación rentable, y presenté la política al comité de riesgos. Se esperaba que redujera 10 % el vencido de las cosechas (cohortes de clientes por periodo de originación), aunque no alcancé a medir el efecto real.",
+     "ms": 2063,
+     "aserciones": 8,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 103,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       13,
+       9,
+       12,
+       11,
+       10,
+       29,
+       2,
+       3
+      ]
+     },
+     "tokens_entrada": 3812
+    }
+   ]
+  },
+  {
+   "caso": {
+    "id": "E4",
+    "turnos": [
+     "¿Para qué has usado Python y SQL?"
+    ],
+    "esperados": [
+     43
+    ],
+    "debe": [
+     "propaga",
+     "stori",
+     "coppel",
+     "\\bsas\\b"
+    ],
+    "no_debe": [
+     "\\bjava\\b"
+    ],
+    "nucleo": false,
+    "frases": null
+   },
+   "corridas": [
+    {
+     "respuesta": "En Propaga usé SQL y Python para el análisis de crédito y la API de la política de decremento de líneas, y Python en funciones Lambda para el bot de Slack y el monitoreo de los agentes de voz. En Stori usé SQL, Python, DBT y Airflow para los pipelines de reportes regulatorios, contables y de buró, y para el cálculo de reservas. Si quieres, puedo contarte más sobre cómo los apliqué en Grupo Coppel o en SAS Institute.",
+     "ms": 3616,
+     "aserciones": 8,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 79,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       43,
+       34,
+       49,
+       41,
+       31,
+       10,
+       37,
+       40
+      ]
+     },
+     "tokens_entrada": 3845
+    },
+    {
+     "respuesta": "En Propaga usé SQL y Python para el análisis de crédito y la API de la política de decremento de líneas, y Python en funciones Lambda para el bot de Slack y el monitoreo de los agentes de voz. En Stori usé SQL y Python junto con DBT y Airflow para los pipelines de reportes regulatorios, contables y de buró, y para el cálculo de reservas. Si deseas conocer más detalles sobre mi experiencia con estas u otras tecnologías, con gusto puedo profundizar.",
+     "ms": 1943,
+     "aserciones": 8,
+     "fallos": [
+      {
+       "tipo": "debe",
+       "patron": "coppel"
+      },
+      {
+       "tipo": "debe",
+       "patron": "\\bsas\\b"
+      }
+     ],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 83,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       43,
+       34,
+       49,
+       41,
+       31,
+       10,
+       37,
+       40
+      ]
+     },
+     "tokens_entrada": 3845
+    }
+   ]
+  }
+ ]
+}

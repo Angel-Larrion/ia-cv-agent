@@ -3,6 +3,7 @@ import json
 import os
 import re
 import time
+from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 from pathlib import Path
 
@@ -19,7 +20,7 @@ MODELO_EMBED = os.environ.get("EMBED_MODEL", "gemini-embedding-001")
 DIMENSIONES = 768
 URL_EMBED = "https://generativelanguage.googleapis.com/v1beta/models/{}:embedContent"
 
-K = 8                   # chunks sent to the model (compare with 6 and 10)
+K = 8                   # chunks sent to the model (smallest k with Hit@k = 1.0; see docs/evaluation.md)
 BOOST_EMPRESA = 0.03    # score bonus for chunks of the company named
 EMPRESAS = ["propaga", "stori", "coppel", "sas"]
 
@@ -56,10 +57,12 @@ def leer_fragmentos(ruta=DATA / "proyectos.md"):
     return fragmentos
 
 
-def embeber(texto, tarea):
+def embeber(texto, tarea, rapido=False):
     """Return the normalized Gemini embedding of a text.
 
     tarea: RETRIEVAL_DOCUMENT for chunks, RETRIEVAL_QUERY for questions.
+    rapido: live requests fail fast (8 s timeout, one retry) so the full-context
+    fallback still fits in the answer budget; the index build keeps patient retries.
     """
     clave = os.environ["GEMINI_API_KEY"]
     cuerpo = {
@@ -68,23 +71,24 @@ def embeber(texto, tarea):
         "taskType": tarea,
         "outputDimensionality": DIMENSIONES,
     }
-    for intento in range(3):
+    intentos = 2 if rapido else 3
+    for intento in range(intentos):
         r = httpx.post(
             URL_EMBED.format(MODELO_EMBED),
             json=cuerpo,
             headers={"x-goog-api-key": clave},
-            timeout=20,
+            timeout=8 if rapido else 20,
         )
         # 429 = rate limit: wait and retry
         if r.status_code == 429:
-            if intento < 2:
-                time.sleep(5 * (intento + 1))
+            if intento < intentos - 1:
+                time.sleep(2 if rapido else 5 * (intento + 1))
             continue
         r.raise_for_status()
         v = np.array(r.json()["embedding"]["values"], dtype="float32")
         # Not normalized at 768 dims; unit vectors make cosine a dot product
         return v / np.linalg.norm(v)
-    raise RuntimeError("Gemini respondio 429 tres veces seguidas")
+    raise RuntimeError("Gemini respondio 429 en todos los intentos")
 
 
 def hash_fragmentos(fragmentos):
@@ -123,8 +127,12 @@ def buscar(pregunta, historial=(), k=K):
     if len(previos) == 2:
         textos.append(" ".join(previos + [pregunta]))
 
+    # Embeddings requested in parallel: one call per query vector
+    with ThreadPoolExecutor(len(textos)) as pool:
+        vectores = list(pool.map(lambda t: embeber(t, "RETRIEVAL_QUERY", rapido=True), textos))
+
     # Each chunk keeps its best score across the vectors
-    puntajes = np.max([matriz @ embeber(t, "RETRIEVAL_QUERY") for t in textos], axis=0)
+    puntajes = np.max([matriz @ v for v in vectores], axis=0)
 
     # Bonus for chunks of the company named in the question
     nombradas = [e for e in EMPRESAS if re.search(rf"\b{e}\b", pregunta.lower())]

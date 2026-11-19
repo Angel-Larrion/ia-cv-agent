@@ -1,0 +1,70 @@
+{
+  "resumen": {
+    "2": {
+      "hit": 0.957,
+      "mrr": 0.935,
+      "recall": 0.781,
+      "tokens_fragmentos": 309
+    },
+    "3": {
+      "hit": 0.978,
+      "mrr": 0.942,
+      "recall": 0.833,
+      "tokens_fragmentos": 452
+    },
+    "4": {
+      "hit": 0.978,
+      "mrr": 0.942,
+      "recall": 0.846,
+      "tokens_fragmentos": 595
+    },
+    "5": {
+      "hit": 0.978,
+      "mrr": 0.942,
+      "recall": 0.895,
+      "tokens_fragmentos": 749
+    },
+    "6": {
+      "hit": 0.978,
+      "mrr": 0.942,
+      "recall": 0.937,
+      "tokens_fragmentos": 903
+    },
+    "8": {
+      "hit": 1.0,
+      "mrr": 0.945,
+      "recall": 0.951,
+      "tokens_fragmentos": 1196
+    },
+    "10": {
+      "hit": 1.0,
+      "mrr": 0.945,
+      "recall": 0.957,
+      "tokens_fragmentos": 1488
+    },
+    "12": {
+      "hit": 1.0,
+      "mrr": 0.945,
+      "recall": 0.964,
+      "tokens_fragmentos": 1798
+    }
+  },
+  "sin_acierto": {
+    "2": [
+      "A2",
+      "I2"
+    ],
+    "3": [
+      "A2"
+    ],
+    "4": [
+      "A2"
+    ],
+    "5": [
+      "A2"
+    ],
+    "6": [
+      "A2"
+    ]
+  }
+}

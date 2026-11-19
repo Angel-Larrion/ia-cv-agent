@@ -1,0 +1,371 @@
+{
+ "resumen": {
+  "modo": "rag",
+  "casos": 3,
+  "corridas": 9,
+  "aserciones_cumplidas": "72/72",
+  "corridas_sin_fallos": "9/9",
+  "fugas_en_trampas": 0,
+  "latencia_p50_ms": 1237,
+  "latencia_p95_ms": 3491,
+  "tokens_entrada_aprox": 3808,
+  "palabras_media": 53.1,
+  "corridas_degradadas": 0,
+  "con_modelo_de_respaldo": 0,
+  "respuestas_cortadas": 0,
+  "reintentos": 0,
+  "hit1": 1.0,
+  "hit4": 1.0,
+  "hitk": 1.0,
+  "mrr": 1.0,
+  "recall": 1.0
+ },
+ "resultados": [
+  {
+   "caso": {
+    "id": "K1",
+    "turnos": [
+     "Tell me about yourself"
+    ],
+    "esperados": [
+     0,
+     42,
+     50
+    ],
+    "debe": [
+     "\\b(i|my)\\b",
+     "credit risk",
+     "data"
+    ],
+    "no_debe": [
+     "\\b(el|los|las|que|con|para|una)\\b",
+     "(?<!not )graduated"
+    ],
+    "nucleo": true,
+    "frases": null
+   },
+   "corridas": [
+    {
+     "respuesta": "I am a mathematician who builds the data layer of credit risk, focusing on the pipelines that keep data reliable and the models, provisions, and policies calculated on top of them. I have more than six years of experience in credit risk and data, with more than five of those in regulated financial institutions, working with IFRS 9, CECL, and the CNBV regulatory methodology across analytics consulting, consumer credit, and fintech. My career spans roles at Propaga, Stori, Grupo Coppel, and SAS Institute, where I have driven projects ranging from automated AI voice debt collection agents to complex regulatory reporting and credit scoring models.",
+     "ms": 2092,
+     "aserciones": 8,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 104,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       0,
+       45,
+       48,
+       42,
+       50,
+       14,
+       47,
+       49
+      ]
+     },
+     "tokens_entrada": 3752
+    },
+    {
+     "respuesta": "I am a mathematician who builds the data layer of credit risk, focusing on the reliable pipelines, models, provisions, and policies calculated on top of them. I have more than six years of experience in credit risk and data, with more than five in regulated financial institutions, working across analytics consulting, consumer credit, and fintech. My recent roles include Principal Data & Analytics Engineer at Propaga, Principal Data Analytics Engineer at Stori, and Manager of Analytics and Models at Grupo Coppel.",
+     "ms": 1552,
+     "aserciones": 8,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 81,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       0,
+       45,
+       48,
+       42,
+       50,
+       14,
+       47,
+       49
+      ]
+     },
+     "tokens_entrada": 3752
+    },
+    {
+     "respuesta": "I am a mathematician who builds the data layer of credit risk, focusing on the pipelines that keep data reliable and the models, provisions, and policies calculated on top of them. I have more than six years of experience in credit risk and data, with over five years in regulated financial institutions, working with IFRS 9, CECL, and the CNBV regulatory methodology across analytics consulting, consumer credit, and fintech. My most recent role was as Principal Data & Analytics Engineer at Propaga, and my education includes completing coursework for a B.Sc. in Mathematics at the Facultad de Ciencias, UNAM in 2020, with my degree title pending.",
+     "ms": 1237,
+     "aserciones": 8,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 106,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       0,
+       45,
+       48,
+       42,
+       50,
+       14,
+       47,
+       49
+      ]
+     },
+     "tokens_entrada": 3752
+    }
+   ]
+  },
+  {
+   "caso": {
+    "id": "X9",
+    "turnos": [
+     "What results did you get with the voice agents?"
+    ],
+    "esperados": [
+     2,
+     4
+    ],
+    "debe": [
+     "6 percentage points",
+     "two[- ]weeks?|2[- ]weeks?"
+    ],
+    "no_debe": [
+     "\\b(el|los|las|que|con|para|una)\\b",
+     "\\b6 ?%|\\b6 percent\\b"
+    ],
+    "nucleo": false,
+    "frases": null
+   },
+   "corridas": [
+    {
+     "respuesta": "In the two-week pilot, the number of recovered accounts increased by 6 percentage points compared to a comparison group; I did not measure beyond that period.",
+     "ms": 3491,
+     "aserciones": 7,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 26,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       2,
+       4,
+       47,
+       44,
+       3,
+       8,
+       6,
+       5
+      ]
+     },
+     "tokens_entrada": 3720
+    },
+    {
+     "respuesta": "In a two-week pilot, the number of recovered accounts increased by 6 percentage points compared to a comparison group; I did not get to measure beyond that period.",
+     "ms": 1027,
+     "aserciones": 7,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 28,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       2,
+       4,
+       47,
+       44,
+       3,
+       8,
+       6,
+       5
+      ]
+     },
+     "tokens_entrada": 3720
+    },
+    {
+     "respuesta": "In a two-week pilot of the AI voice agents at Propaga, the number of recovered accounts increased by 6 percentage points compared to a comparison group; I did not get to measure the effect beyond that period.",
+     "ms": 1044,
+     "aserciones": 7,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 37,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       2,
+       4,
+       47,
+       44,
+       3,
+       8,
+       6,
+       5
+      ]
+     },
+     "tokens_entrada": 3720
+    }
+   ]
+  },
+  {
+   "caso": {
+    "id": "X10",
+    "turnos": [
+     "How many people have you managed?"
+    ],
+    "esperados": [
+     20,
+     33
+    ],
+    "debe": [
+     "four|\\b4\\b",
+     "three|\\b3\\b",
+     "stori",
+     "coppel"
+    ],
+    "no_debe": [
+     "\\b(el|los|las|que|con|para|una)\\b",
+     "\\b(seven|7)\\b"
+    ],
+    "nucleo": false,
+    "frases": null
+   },
+   "corridas": [
+    {
+     "respuesta": "In Coppel I managed a team of three direct reports, and later in Stori I led a team that grew to four direct analytics engineers. Both team sizes exclude myself.",
+     "ms": 2621,
+     "aserciones": 9,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 30,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       33,
+       32,
+       20,
+       34,
+       35,
+       36,
+       22,
+       0
+      ]
+     },
+     "tokens_entrada": 3954
+    },
+    {
+     "respuesta": "At Coppel I managed a team of three direct reports as Manager of Analytics and Models, and at Stori I led up to four direct reports as Principal Data Analytics Engineer.",
+     "ms": 1093,
+     "aserciones": 9,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 31,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       33,
+       32,
+       20,
+       34,
+       35,
+       36,
+       22,
+       0
+      ]
+     },
+     "tokens_entrada": 3954
+    },
+    {
+     "respuesta": "In Coppel I managed a team of three direct reports as a manager of analytics and models, and later in Stori I led a team of four direct reports as a Principal Data Analytics Engineer.",
+     "ms": 1040,
+     "aserciones": 9,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 35,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       33,
+       32,
+       20,
+       34,
+       35,
+       36,
+       22,
+       0
+      ]
+     },
+     "tokens_entrada": 3954
+    }
+   ]
+  }
+ ]
+}

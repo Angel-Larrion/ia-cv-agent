@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 import agente
 import rag
 
-API_KEY = os.environ.get("AGENT_API_KEY", "")
+API_KEY = os.environ.get("AGENT_API_KEY", "").strip()
 MODEL = "angel-larrion-cv-agent"
 
 app = FastAPI(title="CV agent")

@@ -4,3 +4,9 @@ venv
 __pycache__
 *.pyc
 .env
+eval/
+docs/
+README.md
+.env.example
+Claude outputs/
+_to_delete/
