@@ -2,8 +2,8 @@
 
 - Location: Ciudad de México
 - Email: angel.larrion.covarrubias@gmail.com
-- LinkedIn: (agregar URL)
-- GitHub: (agregar URL)
+- LinkedIn: https://mx.linkedin.com/in/angel-larri%C3%B3n-covarrubias-5b9608267
+- GitHub: https://github.com/Angel-Larrion
 
 ## Profile
 
@@ -16,7 +16,7 @@ Mathematician who builds the data layer of credit risk: the pipelines that keep 
 Fintech providing credit to neighborhood stores in Mexico through their distributors.
 
 - Led the implementation of AI voice agents for debt collection, from the initial pilot to an automated daily process with its own dashboard.
-- Designed the credit line decrement policy, took it through credit committee approval and built the module that applies it in the decision API.
+- Designed the credit line decrement policy, presented it to the risk committee and built the module that applies it in the decision API.
 
 ### Stori — Digital bank in Mexico offering credit cards, personal loans and deposits (Oct 2024 – Apr 2026)
 
@@ -24,7 +24,7 @@ Digital bank in Mexico offering credit cards, personal loans and deposits.
 
 #### Principal Data Analytics Engineer (Aug 2025 – Apr 2026)
 
-- Led a four-person team responsible for data strategy and delivery for Personal Loans, Credit Cards and Deposits, a portfolio of more than 3 million customers, expanding coverage across accounting, regulatory reporting, tax and audit requirements.
+- Led a team of four direct reports (not counting myself) responsible for data strategy and delivery for Personal Loans, Credit Cards and Deposits, a portfolio of more than 3 million customers, expanding coverage across accounting, regulatory reporting, tax and audit requirements.
 - Served as the primary point of contact for Regulatory, Accounting, Tax, Credit Bureau and Compliance, managing the delivery of 50+ recurring reports and the data quality standards behind them.
 - Implemented the IFRS 9 expected credit loss framework for Personal Loans and Credit Cards, including stage classification, translating business definitions into data models and into the accounting and regulatory reporting logic built on them.
 - Scaled and standardized data models and pipelines using DBT and Apache Airflow, implementing automated validation processes to keep accuracy and consistency across all datasets and reports.
@@ -40,7 +40,7 @@ Retail group with its own bank and consumer credit operation.
 
 #### Manager, Analytics and Models (Nov 2023 – Oct 2024)
 
-- Led a three-person analytics and models team.
+- Led a team of three direct reports (not counting myself) in analytics and models.
 - Developed a behavioral model to classify store customers.
 - Assessed whether the customer behavioral score of one of the group's companies could be used to grant credit line increases without deteriorating portfolio risk.
 - Translated calculations performed in an external licensed application into SQL so they could run directly in the database, eliminating a USD 100,000 annual license cost.
@@ -61,7 +61,7 @@ Analytics software company; consulting projects for client institutions in finan
 
 ## Skills
 
-SQL · Python · AI Agents (Cursor & Claude) · DBT · Apache Airflow · AWS (Lambda, S3, Athena, QuickSight, Bedrock) · SAS · SAS Visual Analytics · Excel · R · Matlab
+SQL · Python · SPSS · AI Agents (Cursor & Claude) · DBT · Apache Airflow · AWS (Lambda, S3, Athena, QuickSight, Bedrock) · SAS · SAS Visual Analytics · Excel · R · Matlab
 
 ## Languages
 
