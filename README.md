@@ -1,5 +1,7 @@
 # ia-cv-agent
 
+[![CI](https://github.com/Angel-Larrion/ia-cv-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Angel-Larrion/ia-cv-agent/actions/workflows/ci.yml)
+
 A conversational agent that answers questions about the professional profile of Angel Larrión (experience, skills, projects). It exposes an [Open Responses](https://www.openresponses.org/specification) endpoint, answers from a curated knowledge base with retrieval-augmented generation (RAG), and degrades gracefully when its dependencies fail.
 
 Built with a free-tier stack: Python, FastAPI, Gemini, Docker and Render.
@@ -146,6 +148,15 @@ docker run -p 8000:8000 -e AGENT_API_KEY=my-key -e GEMINI_API_KEY=your-gemini-ke
 | `CORS_ORIGINS` | the challenge platform | Comma-separated browser origins allowed by CORS |
 | `PORT` | `8000` | Port in the Docker image |
 
+### Run the tests
+
+```
+pip install -r requirements-dev.txt
+pytest -q
+```
+
+The 37 tests cover the API (auth, 400/413/429 errors, streaming, response format), the agent (language detector, history cleaning, retries, model fallback, last-resort message) and retrieval (51 chunks, index matching the document, query vectors). Gemini and the embeddings are replaced by fakes, so they need no API key and use no quota. GitHub Actions runs them on every push (`.github/workflows/ci.yml`). They check that the code around the model works; the answer quality is measured by the evaluation below.
+
 ### Rebuild the index and run the evaluation
 
 ```bash
@@ -168,6 +179,7 @@ rag.py              chunking, embeddings, index loading, search
 data/               cv.md, proyectos.md, prompt.md, index.json
 scripts/            build_index.py (embeds the chunks)
 eval/               test cases, runner, k comparison, embedding and thinking benchmarks, kept results
+tests/              pytest suite (API, agent, retrieval) with Gemini replaced by fakes
 docs/               rag.md (how the retrieval was built), evaluation.md (tests and optimization history)
 Dockerfile          python:3.12-slim image; requirements.txt has pinned versions
 ```
