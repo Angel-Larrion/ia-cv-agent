@@ -14,24 +14,25 @@ ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
 INDICE = DATA / "index.json"
 
-# 768: tamaño recomendado por Google y suficiente para un corpus pequeño (se revisa en la evaluación)
+# 768: Google's recommended size, enough for a small corpus
 MODELO_EMBED = os.environ.get("EMBED_MODEL", "gemini-embedding-001")
 DIMENSIONES = 768
 URL_EMBED = "https://generativelanguage.googleapis.com/v1beta/models/{}:embedContent"
 
-K = 8                   # fragmentos que se mandan al modelo (se compara con 6 y 10)
-BOOST_EMPRESA = 0.03    # empujón a los fragmentos de la empresa mencionada
+K = 8                   # chunks sent to the model (compare with 6 and 10)
+BOOST_EMPRESA = 0.03    # score bonus for chunks of the company named
 EMPRESAS = ["propaga", "stori", "coppel", "sas"]
 
 
 def leer_fragmentos(ruta=DATA / "proyectos.md"):
-    """Parte proyectos.md en fragmentos: uno por cada encabezado '###'."""
+    """Split proyectos.md into chunks, one per '###' heading."""
     texto = Path(ruta).read_text(encoding="utf-8-sig")
     fragmentos = []
     titulo = None
     cuerpo = []
 
     def guardar():
+        """Save the chunk being built, if it has a title."""
         if titulo:
             fragmentos.append({
                 "id": len(fragmentos),
@@ -45,7 +46,7 @@ def leer_fragmentos(ruta=DATA / "proyectos.md"):
             titulo = linea[4:].strip()
             cuerpo = []
         elif linea.startswith("#") or linea.strip() == "---":
-            # Un encabezado de sección o una raya cierra el fragmento actual
+            # A section heading or a rule closes the current chunk
             guardar()
             titulo = None
             cuerpo = []
@@ -56,9 +57,9 @@ def leer_fragmentos(ruta=DATA / "proyectos.md"):
 
 
 def embeber(texto, tarea):
-    """Pide a Gemini el embedding de un texto y lo devuelve normalizado.
+    """Return the normalized Gemini embedding of a text.
 
-    tarea: "RETRIEVAL_DOCUMENT" para fragmentos, "RETRIEVAL_QUERY" para preguntas.
+    tarea: RETRIEVAL_DOCUMENT for chunks, RETRIEVAL_QUERY for questions.
     """
     clave = os.environ["GEMINI_API_KEY"]
     cuerpo = {
@@ -74,28 +75,27 @@ def embeber(texto, tarea):
             headers={"x-goog-api-key": clave},
             timeout=20,
         )
-        # 429 = limite de peticiones: se espera y se reintenta.
+        # 429 = rate limit: wait and retry
         if r.status_code == 429:
             if intento < 2:
                 time.sleep(5 * (intento + 1))
             continue
         r.raise_for_status()
         v = np.array(r.json()["embedding"]["values"], dtype="float32")
-        # Gemini no normaliza con 768 dimensiones, asi que lo hacemos aqui:
-        # con vectores de longitud 1, coseno = producto punto.
+        # Not normalized at 768 dims; unit vectors make cosine a dot product
         return v / np.linalg.norm(v)
     raise RuntimeError("Gemini respondio 429 tres veces seguidas")
 
 
 def hash_fragmentos(fragmentos):
-    """Huella del contenido de los fragmentos (no depende de los saltos de línea del archivo)."""
+    """Fingerprint of the chunk text, independent of line endings."""
     texto = "\n".join(f["titulo"] + "\n" + f["texto"] for f in fragmentos)
     return hashlib.sha256(texto.encode("utf-8")).hexdigest()
 
 
 @lru_cache(maxsize=1)
 def cargar_indice():
-    """Carga data/index.json y comprueba que corresponda al modelo y al documento actuales."""
+    """Load index.json and check it matches the model and document."""
     datos = json.loads(INDICE.read_text(encoding="utf-8"))
     if datos["modelo"] != MODELO_EMBED or datos["dimensiones"] != DIMENSIONES:
         raise ValueError("El índice se hizo con otro modelo o con otras dimensiones")
@@ -103,19 +103,19 @@ def cargar_indice():
         raise ValueError("proyectos.md cambió: hay que volver a correr scripts.build_index")
     fragmentos = datos["fragmentos"]
     matriz = np.array([f.pop("vector") for f in fragmentos], dtype="float32")
-    # Se normaliza de nuevo porque los vectores guardados están redondeados
+    # Normalize again: the stored vectors were rounded
     matriz /= np.linalg.norm(matriz, axis=1, keepdims=True)
     return fragmentos, matriz
 
 
 def buscar(pregunta, historial=(), k=K):
-    """Devuelve los k fragmentos más parecidos a la pregunta, con su puntaje.
+    """Return the k chunks closest to the question, with scores.
 
-    historial: mensajes previos del usuario, del más antiguo al más reciente.
+    historial: previous user messages, oldest first.
     """
     fragmentos, matriz = cargar_indice()
 
-    # Vectores de la pregunta: sola, con el mensaje previo y con los dos previos
+    # Query vectors: alone, with last message, with last two
     previos = list(historial)[-2:]
     textos = [pregunta]
     if previos:
@@ -123,10 +123,10 @@ def buscar(pregunta, historial=(), k=K):
     if len(previos) == 2:
         textos.append(" ".join(previos + [pregunta]))
 
-    # Cada fragmento se queda con su mejor puntaje entre los vectores
+    # Each chunk keeps its best score across the vectors
     puntajes = np.max([matriz @ embeber(t, "RETRIEVAL_QUERY") for t in textos], axis=0)
 
-    # Empujón a los fragmentos de la empresa que se nombra en la pregunta
+    # Bonus for chunks of the company named in the question
     nombradas = [e for e in EMPRESAS if re.search(rf"\b{e}\b", pregunta.lower())]
     for i, f in enumerate(fragmentos):
         empresa = f["titulo"].split(" · ")[0].lower()

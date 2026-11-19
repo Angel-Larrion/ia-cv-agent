@@ -6,12 +6,13 @@ from rag import DATA, DIMENSIONES, MODELO_EMBED, embeber, hash_fragmentos, leer_
 
 ESPERADOS = 51
 DESTINO = DATA / "index.json"
-PAUSA = 0.7  # segundos entre llamadas; el límite es de 100 por minuto
+PAUSA = 0.7  # seconds between calls; the limit is 100 per minute
 
 
 def main():
+    """Compute every chunk's embedding and write data/index.json."""
     fragmentos = leer_fragmentos()
-    # Si una edición rompe un encabezado, el script se detiene aquí
+    # Stops here if an edit broke a heading
     assert len(fragmentos) == ESPERADOS, (
         f"Se esperaban {ESPERADOS} fragmentos y salieron {len(fragmentos)}"
     )
@@ -30,7 +31,7 @@ def main():
         "hash": hash_fragmentos(fragmentos),
         "fragmentos": fragmentos,
     }
-    # Se guarda al final: si algo falla a la mitad, no queda un índice incompleto
+    # Saved only at the end: no half-built index if it fails
     DESTINO.write_text(json.dumps(indice, ensure_ascii=False), encoding="utf-8")
     print(f"Listo: {len(fragmentos)} fragmentos en {DESTINO.name} ({DESTINO.stat().st_size // 1024} KB)")
 

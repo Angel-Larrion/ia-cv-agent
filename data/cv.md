@@ -70,7 +70,7 @@ SQL · Python · SPSS · AI Agents (Cursor & Claude) · DBT · Apache Airflow ·
 
 ## Education
 
-B.Sc. Mathematics, coursework completed (degree title pending) — Facultad de Ciencias, UNAM (2020).
+B.Sc. Mathematics, coursework completed (degree title pending) — Facultad de Ciencias, UNAM (2020). No master's degree or doctorate.
 
 ## Certifications
 

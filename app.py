@@ -20,7 +20,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 
 def precalentar():
-    """Carga el prompt y el índice al arrancar: si algo falla, se ve en los logs de inmediato."""
+    """Load prompt and index at startup so failures show in the logs."""
     if not API_KEY:
         agente.registrar("arranque_sin_clave", aviso="AGENT_API_KEY no está definida: el endpoint rechaza todas las peticiones")
     try:
@@ -34,15 +34,17 @@ precalentar()
 
 
 def check_auth(authorization):
-    # Sin AGENT_API_KEY el endpoint se cierra: nunca queda abierto por omisión
+    """Reject the request unless it carries the right Bearer key."""
+    # Without AGENT_API_KEY the endpoint stays closed, never open by default
     if not API_KEY:
         raise HTTPException(503, "Server misconfigured: AGENT_API_KEY is not set")
+    # compare_digest: constant time, and safe with non-ASCII headers
     if not hmac.compare_digest((authorization or "").encode(), f"Bearer {API_KEY}".encode()):
         raise HTTPException(401, "Invalid or missing API key")
 
 
 def parse_input(body):
-    """`input` puede ser un string o una lista de items; devuelve [(rol, texto)]."""
+    """Turn the request `input` (string or items) into [(role, text)]."""
     raw = body.get("input", "")
     if isinstance(raw, str):
         return [("user", raw)]
@@ -62,6 +64,7 @@ def parse_input(body):
 
 
 def response_object(resp_id, created, text, status, body):
+    """Build the Open Responses response object."""
     output = []
     if status == "completed":
         output = [message_item(resp_id, text, "completed")]
@@ -90,6 +93,7 @@ def response_object(resp_id, created, text, status, body):
 
 
 def message_item(resp_id, text, status):
+    """Build the assistant message item of a response."""
     content = [{"type": "output_text", "text": text, "annotations": []}] if text else []
     return {
         "id": "msg_" + resp_id[5:],
@@ -101,11 +105,13 @@ def message_item(resp_id, text, status):
 
 
 def sse(event, data):
+    """Format one server-sent event."""
     data = {"type": event, **data}
     return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
 
 
 def stream(text, body):
+    """Emit the answer as SSE events; full text, split into words."""
     resp_id = "resp_" + uuid.uuid4().hex
     created = int(time.time())
     msg_id = "msg_" + resp_id[5:]
@@ -124,6 +130,7 @@ def stream(text, body):
         "part": {"type": "output_text", "text": "", "annotations": []},
     })
 
+    # Simulated streaming: the answer is already complete
     words = text.split(" ")
     for i, word in enumerate(words):
         delta = word if i == len(words) - 1 else word + " "
@@ -142,11 +149,13 @@ def stream(text, body):
 
 @app.get("/health")
 def health():
+    """Health check for Render."""
     return {"status": "ok"}
 
 
 @app.get("/.well-known/agent-card.json")
 def agent_card(request: Request):
+    """Serve the A2A agent card."""
     base = str(request.base_url).rstrip("/")
     return {
         "name": "Angel Larrion - AI Engineer",
@@ -167,6 +176,7 @@ def agent_card(request: Request):
 
 @app.post("/v1/responses")
 async def create_response(request: Request, authorization: str | None = Header(default=None)):
+    """Answer a /v1/responses request, as JSON or as a stream."""
     check_auth(authorization)
     try:
         body = await request.json()
@@ -175,8 +185,8 @@ async def create_response(request: Request, authorization: str | None = Header(d
     if not isinstance(body, dict):
         raise HTTPException(400, "Body must be a JSON object")
 
-    # agente.responder espera a la red: en un hilo aparte para no bloquear a otros usuarios.
-    # El campo `instructions` del cliente se ignora a propósito.
+    # Own thread: responder waits on the network and would block the server
+    # The client's `instructions` field is ignored on purpose
     text = await run_in_threadpool(agente.responder, parse_input(body))
 
     if body.get("stream"):

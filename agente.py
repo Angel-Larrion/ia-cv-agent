@@ -12,49 +12,47 @@ MODELO = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite")
 MODELO_RESPALDO = os.environ.get("GEMINI_FALLBACK_MODEL", "gemini-3.1-flash-lite")
 URL_GENERAR = "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent"
 
-REINTENTOS = int(os.environ.get("GEMINI_RETRIES", "2"))  # solo para el modelo principal
-TEMPERATURA = 0.3       # baja, para que las respuestas sobre el CV sean estables
-MAX_MENSAJES = 12       # mensajes del historial que se aceptan
-MAX_CARACTERES = 2000   # largo máximo de cada mensaje
-MAX_TOKENS_SALIDA = 2048  # holgura por si el modelo gasta tokens razonando
-PRESUPUESTO = 40        # segundos máximos para generar la respuesta, contando reintentos
-TIMEOUT_LLAMADA = 20    # segundos máximos de cada llamada a Gemini
-MIN_RESTANTE = 3        # con menos segundos que estos ya no se intenta otra llamada
+REINTENTOS = int(os.environ.get("GEMINI_RETRIES", "2"))  # main model only
+TEMPERATURA = 0.3       # low, for stable answers about the CV
+MAX_MENSAJES = 12       # history messages accepted
+MAX_CARACTERES = 2000   # max characters per message
+MAX_TOKENS_SALIDA = 2048  # headroom in case the model spends tokens reasoning
+PRESUPUESTO = 40        # max seconds to answer, retries included
+TIMEOUT_LLAMADA = 20    # max seconds per Gemini call
+MIN_RESTANTE = 3        # below this many seconds, no new attempt
 
 SIN_PREGUNTA = "No recibí ninguna pregunta. ¿Qué te gustaría saber sobre la trayectoria de Angel?"
 
 
 class ErrorGemini(Exception):
-    pass
+    """A Gemini call failed or came back empty."""
 
 
 @lru_cache(maxsize=1)
 def cargar_textos():
-    """Lee la plantilla del prompt y el CV completo (una sola vez)."""
+    """Read the prompt template and the full CV, once."""
     plantilla = (rag.DATA / "prompt.md").read_text(encoding="utf-8-sig")
     cv = (rag.DATA / "cv.md").read_text(encoding="utf-8-sig").strip()
     return plantilla, cv
 
 
 def limpiar(texto):
-    """Quita las etiquetas que delimitan el CV y los fragmentos dentro del prompt."""
+    """Remove the tags that delimit the CV and chunks in the prompt."""
     return re.sub(r"</?\s*(cv|fragmentos)\s*>", "", texto, flags=re.IGNORECASE)
 
 
 def preparar(mensajes):
-    """Deja solo mensajes de usuario y asistente, recientes, cortos y sin etiquetas del prompt.
-
-    Se descartan los roles system/developer: el cliente no puede dar instrucciones.
-    Devuelve [] si no queda ninguna pregunta del usuario al final.
-    """
+    """Keep recent, short user/assistant messages; [] if no final user question."""
     limpios = []
     for rol, texto in mensajes:
+        # system/developer roles dropped: the client can't give instructions
         if rol not in ("user", "assistant") or not isinstance(texto, str):
             continue
         texto = limpiar(texto).strip()[:MAX_CARACTERES]
         if texto:
             limpios.append((rol, texto))
     limpios = limpios[-MAX_MENSAJES:]
+    # The conversation must start and end with the user
     while limpios and limpios[0][0] != "user":
         limpios.pop(0)
     if not limpios or limpios[-1][0] != "user":
@@ -63,7 +61,7 @@ def preparar(mensajes):
 
 
 def recuperar(mensajes):
-    """Busca los fragmentos relevantes; si falla, devuelve todos (respaldo)."""
+    """Search relevant chunks; if it fails, return all of them."""
     pregunta = mensajes[-1][1]
     previos = [t for r, t in mensajes[:-1] if r == "user"]
     try:
@@ -74,18 +72,20 @@ def recuperar(mensajes):
 
 
 def armar_prompt(fragmentos):
-    """Rellena {cv} y {fragmentos} de la plantilla en una sola pasada."""
+    """Fill {cv} and {fragmentos} in the template."""
     plantilla, cv = cargar_textos()
     texto = "\n\n".join(f"### {f['titulo']}\n{f['texto']}" for f in fragmentos)
     valores = {"cv": cv, "fragmentos": texto}
+    # One pass, so a placeholder inside the CV isn't replaced
     return re.sub(r"\{(cv|fragmentos)\}", lambda m: valores[m.group(1)], plantilla)
 
 
 def extraer_texto(datos):
-    """Junta solo el campo 'text' de las partes y devuelve (texto, finishReason)."""
+    """Join the parts' text and return (text, finishReason)."""
     candidatos = datos.get("candidates") or []
     partes = candidatos[0].get("content", {}).get("parts", []) if candidatos else []
     motivo = candidatos[0].get("finishReason") if candidatos else "sin candidatos"
+    # Thought parts are skipped; only the answer text goes out
     texto = "".join(p.get("text", "") for p in partes if not p.get("thought")).strip()
     if not texto:
         raise ErrorGemini(f"respuesta vacía ({motivo})")
@@ -93,10 +93,9 @@ def extraer_texto(datos):
 
 
 def llamar_gemini(modelo, prompt, mensajes, reintentos, limite):
-    """Pide la respuesta a un modelo y devuelve (texto, finishReason).
+    """Ask one model for the answer; return (text, finishReason).
 
-    Reintenta solo si hay 429, error 5xx o corte de red, y nunca pasa de `limite`
-    (hora en que se acaba el presupuesto de tiempo).
+    Retries only on 429, 5xx or network errors, never past `limite`.
     """
     cuerpo = {
         "systemInstruction": {"parts": [{"text": prompt}]},
@@ -122,20 +121,20 @@ def llamar_gemini(modelo, prompt, mensajes, reintentos, limite):
             if r.status_code == 429 or r.status_code >= 500:
                 ultimo = f"HTTP {r.status_code}"
             else:
-                r.raise_for_status()  # un 400 o 403 no se arregla reintentando
+                r.raise_for_status()  # a 400 or 403 isn't fixed by retrying
                 return extraer_texto(r.json())
         except httpx.TransportError as e:
             ultimo = type(e).__name__
         espera = 5 * (intento + 1)
         if intento < reintentos:
             if time.time() + espera > limite - MIN_RESTANTE:
-                break  # no tiene caso esperar si ya no alcanzará otra llamada
+                break  # no point waiting if there's no time for another call
             time.sleep(espera)
     raise ErrorGemini(f"{modelo}: {ultimo}")
 
 
 def mensaje_amable():
-    """Respuesta cuando nada funcionó: resumen del perfil sacado del CV."""
+    """Last-resort reply: apology plus the CV profile summary."""
     texto = ("Tuve un problema técnico y no pude consultar mi información completa en este "
              "momento. Puedes intentarlo de nuevo en un minuto.")
     try:
@@ -149,12 +148,12 @@ def mensaje_amable():
 
 
 def registrar(evento, **campos):
-    """Una línea JSON por evento; se ve en los logs de Render."""
+    """Print one JSON line per event (shows in Render logs)."""
     print(json.dumps({"evento": evento, **campos}, ensure_ascii=False), flush=True)
 
 
 def responder(mensajes):
-    """Recibe [(rol, texto), ...] y devuelve el texto de la respuesta. Nunca lanza error."""
+    """Take [(role, text), ...] and return the answer; never raises."""
     inicio = time.time()
     limite = inicio + PRESUPUESTO
     try:
@@ -163,6 +162,7 @@ def responder(mensajes):
             return SIN_PREGUNTA
         fragmentos, modo = recuperar(mensajes)
         prompt = armar_prompt(fragmentos)
+        # Main model with retries, then the fallback with a single attempt
         for modelo, reintentos in ((MODELO, REINTENTOS), (MODELO_RESPALDO, 0)):
             try:
                 texto, motivo = llamar_gemini(modelo, prompt, mensajes, reintentos, limite)
