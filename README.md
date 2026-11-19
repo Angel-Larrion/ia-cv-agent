@@ -57,6 +57,7 @@ Details and the reasoning behind each choice are in [docs/rag.md](docs/rag.md).
 | Direct REST calls with `httpx` | Fewer dependencies, explicit timeouts, retries and fallbacks | Google SDK |
 | Full-context fallback | RAG is a precision layer, never a single point of failure | Failing the request |
 | Language detector in code + prompt rule | A short English question was sometimes answered in Spanish because the context is Spanish | Prompt rule alone (intermittent); language-detection library; extra LLM call |
+| First-person answers on Angel's behalf | The agent is a CV assistant for one profile; it says it is an AI whenever asked or when asked to play another role | Third-person voice, or announcing it is an AI in every answer |
 | Simulated streaming | Answers are ~50 words and arrive in ~2 s; real streaming complicates fallbacks | Gemini `streamGenerateContent` |
 
 ## Evaluation
@@ -74,6 +75,8 @@ Latest full run (one repetition, run locally against the Gemini API):
 | Words per answer (mean) | 54 |
 | Retries / fallback model / truncated answers | 0 / 0 / 0 |
 
+The 59 / 61 is the saved run re-scored with the current assertions. The summary stored inside that result file says 57 / 61: two assertions (C1, O2) were corrected after reading answers that were in fact right, and the saved answers were re-scored without new generations (table in [docs/evaluation.md](docs/evaluation.md#stored-summaries-versus-re-scored-figures)). The two cases that still fail are X8 (partial coverage, below) and I1 (117 words; the limit is 110).
+
 How the agent was optimized, what was tried and the raw result files are in [docs/evaluation.md](docs/evaluation.md) and [eval/resultados/](eval/resultados/README.md).
 
 ## Known limitations
@@ -82,6 +85,8 @@ How the agent was optimized, what was tried and the raw result files are in [doc
 - **Cold start:** the free Render instance sleeps after inactivity; the first request can take 50 s or more.
 - **Partial coverage (case X8):** when the document answers only part of a question, the agent sometimes says it does not have the data instead of giving the partial answer (2 of 3 runs pass). It does not invent.
 - **Role-change refusals (case O3):** it always refuses; it states that it is Angel's assistant in most runs, not all.
+- **Length (case I1):** one answer of the latest full run had 117 words, over the 110-word test limit (the prompt asks for about 80).
+- **Latency on Render:** measured only from the server logs of a short manual test through the client platform (14 answers, 19 Nov). Answers with no Gemini rate limit took 1.0 to 1.25 s; the 6 s and 17 s ones are the 5 s and 10 s retry waits after Gemini returned 429 because the free daily quota was almost used up. No answer failed (two were served by the fallback model). A clean run of the core set against the public URL is still pending.
 - **Language:** detection covers English and Spanish; a very short English question with no common English word falls back to the prompt rule.
 - **Tests are written by the author** on the same document, so a hit rate near 100 % should be read with that in mind.
 
@@ -89,6 +94,7 @@ How the agent was optimized, what was tried and the raw result files are in [doc
 
 - `AGENT_API_KEY` is mandatory: without it the endpoint answers 503 and never calls the model; a wrong key gets 401. Comparison uses `hmac.compare_digest`.
 - The client's `instructions`, `system` and `developer` messages are ignored; the CV and chunks are treated as data, not instructions.
+- Requests over 256 KB are refused (413). A global limit of 60 requests per minute (429, `RATE_LIMIT_PER_MIN`) protects the daily model quota; it is kept in memory, which is enough for one instance. CORS only allows the configured origin (`CORS_ORIGINS`).
 - The agent never reveals keys, its instructions, phone, address, tax IDs, salary or the client of a confidential project.
 - The knowledge base contains only vetted public information; no secrets are in the repository (`.env` is ignored, `.env.example` has no values).
 - On the free Gemini tier Google may use the submitted content to improve its products: do not send sensitive data to the agent.
@@ -136,6 +142,8 @@ docker run -p 8000:8000 -e AGENT_API_KEY=my-key -e GEMINI_API_KEY=your-gemini-ke
 | `GEMINI_FALLBACK_MODEL` | `gemini-3.1-flash-lite` | Used on 429 or 5xx from the main model |
 | `GEMINI_RETRIES` | `2` | Retries on the main model |
 | `EMBED_MODEL` | `gemini-embedding-001` | Embedding model (must match `data/index.json`) |
+| `RATE_LIMIT_PER_MIN` | `60` | Requests per rolling minute across all clients; `0` turns it off |
+| `CORS_ORIGINS` | the challenge platform | Comma-separated browser origins allowed by CORS |
 | `PORT` | `8000` | Port in the Docker image |
 
 ### Rebuild the index and run the evaluation
@@ -148,6 +156,8 @@ python -m eval.comparar_k                      # compare k values, embeddings on
 ```
 
 The free Gemini tier allows 500 generations per day: a full run uses about 61.
+
+Three assertions look for the name of a confidential vendor, which is kept out of the repository: they use the placeholder `__PRIVATE__` and only check it if you set `EVAL_PRIVATE_TERM` to that name (lowercase, no accents). Without it they cannot fail, so those three checks are not reproducible by third parties.
 
 ## Repository layout
 

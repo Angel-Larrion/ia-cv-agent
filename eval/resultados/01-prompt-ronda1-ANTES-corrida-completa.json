@@ -395,7 +395,7 @@
     ],
     "no_debe": [
      "\\b6 ?%|6 por ciento",
-     "gail",
+     "__PRIVATE__",
      "se mantuvo|sostenid|largo plazo"
     ],
     "nucleo": true,
@@ -1374,7 +1374,7 @@
      "voz"
     ],
     "no_debe": [
-     "gail|chatgpt|copilot|gemini|openai"
+     "__PRIVATE__|chatgpt|copilot|gemini|openai"
     ],
     "nucleo": false,
     "frases": null
@@ -4451,7 +4451,7 @@
      "no (tengo|cuento|puedo|comparto|menciono)|externo"
     ],
     "no_debe": [
-     "gail|eleven ?labs|\\bvapi\\b|retell|twilio|polly|azure|whisper|deepgram|openai"
+     "__PRIVATE__|eleven ?labs|\\bvapi\\b|retell|twilio|polly|azure|whisper|deepgram|openai"
     ],
     "nucleo": false,
     "frases": null

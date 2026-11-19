@@ -1,6 +1,8 @@
+import collections
 import hmac
 import json
 import os
+import threading
 import time
 import uuid
 
@@ -14,9 +16,16 @@ import rag
 
 API_KEY = os.environ.get("AGENT_API_KEY", "").strip()
 MODEL = "angel-larrion-cv-agent"
+MAX_BODY = 256 * 1024  # bytes; a full 12-message history is about 25 KB
+RATE_LIMIT = int(os.environ.get("RATE_LIMIT_PER_MIN", "60"))  # 0 turns it off
+CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "https://hackathon-2024.com").split(",") if o.strip()]
 
 app = FastAPI(title="CV agent")
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS, allow_methods=["GET", "POST"],
+                   allow_headers=["Authorization", "Content-Type"])
+
+recent_requests = collections.deque()
+rate_lock = threading.Lock()
 
 
 def precalentar():
@@ -41,6 +50,34 @@ def check_auth(authorization):
     # compare_digest: constant time, and safe with non-ASCII headers
     if not hmac.compare_digest((authorization or "").encode(), f"Bearer {API_KEY}".encode()):
         raise HTTPException(401, "Invalid or missing API key")
+
+
+def check_rate():
+    """Allow at most RATE_LIMIT requests per rolling minute, shared by all clients."""
+    if RATE_LIMIT <= 0:
+        return
+    now = time.monotonic()
+    with rate_lock:
+        while recent_requests and now - recent_requests[0] > 60:
+            recent_requests.popleft()
+        if len(recent_requests) >= RATE_LIMIT:
+            wait = int(60 - (now - recent_requests[0])) + 1
+            raise HTTPException(429, "Rate limit exceeded", headers={"Retry-After": str(wait)})
+        recent_requests.append(now)
+
+
+async def read_body(request):
+    """Read the body, refusing anything over MAX_BODY bytes."""
+    declared = request.headers.get("content-length", "")
+    if declared.isdigit() and int(declared) > MAX_BODY:
+        raise HTTPException(413, "Body too large")
+    chunks, size = [], 0
+    async for chunk in request.stream():
+        size += len(chunk)
+        if size > MAX_BODY:
+            raise HTTPException(413, "Body too large")
+        chunks.append(chunk)
+    return b"".join(chunks)
 
 
 def parse_input(body):
@@ -86,7 +123,7 @@ def response_object(resp_id, created, text, status, body):
         "parallel_tool_calls": False,
         "text": {"format": {"type": "text"}},
         "top_p": 1.0,
-        "temperature": 1.0,
+        "temperature": agente.TEMPERATURA,
         "usage": None,
         "metadata": {},
     }
@@ -178,8 +215,9 @@ def agent_card(request: Request):
 async def create_response(request: Request, authorization: str | None = Header(default=None)):
     """Answer a /v1/responses request, as JSON or as a stream."""
     check_auth(authorization)
+    check_rate()
     try:
-        body = await request.json()
+        body = json.loads(await read_body(request))
     except ValueError:
         raise HTTPException(400, "Invalid JSON body")
     if not isinstance(body, dict):

@@ -9,6 +9,20 @@
 - **Pauses:** 5 s between generations keeps the run at about 12 per minute, under the limit of 15; 0.1 s after each new search is a token margin under the embedding limit of 100 per minute (the run makes at most about 36 per minute).
 - **Re-scoring:** when an assertion is fixed, saved responses can be re-scored with `revisar()` without spending generations. All figures below use the current assertions. Assertions were fixed only after reading the real answer and finding the agent correct (for example, one case required naming four companies while the prompt asks for the two most relevant); real agent failures were fixed in the prompt or code.
 
+## Stored summaries versus re-scored figures
+
+Every result file stores the `resumen` computed with the assertions of that moment. The figures in this document re-score the saved answers with the current assertions (no new generations). Where they differ:
+
+| File | Stored summary | Re-scored | What changed |
+|---|---|---|---|
+| `01` | 87/122 | 105/122 | Assertions corrected after reading correct answers (full run, two repetitions) |
+| `02` | 105/122 | 111/122 | Same |
+| `05` | 5/6 | 6/6 | E4 no longer required naming four companies; the prompt asks for the two most relevant |
+| `07` | 23/26 | 24/26 | One assertion corrected |
+| `10` | 57/61 | 59/61 | C1 and O2 corrected; I1 (117 words) and X8 still fail |
+
+Files `03`, `04`, `08` and `09` give the same figure either way. The criterion: an assertion was changed only after reading the real answer and finding the agent correct, never to make a failing answer pass.
+
 ## Optimization as a chain of improvements
 
 The real process was not linear (prompt, code and measurement changes were mixed and each test used a different set of cases). This view orders it by topic.
@@ -50,11 +64,14 @@ Combinations such as "k = 6 with the final prompt" were never run.
 
 ## Latency
 
-Median about 2 s end to end when run locally against the Gemini API (the model call itself takes about 1.3 s median). The free Gemini tier gives no latency guarantee: the full runs of the morning showed a p95 of 10–12 s, and later runs 2.7 s with one isolated 16 s spike. External references for scale: 1–3 s is a common target for RAG chatbots, and Gemini 3.5 Flash-Lite generates about 382 tokens per second, so a 100-token answer is written in well under a second. Latency measured on Render (with cold start) is a separate measurement.
+Median about 2 s end to end when run locally against the Gemini API (the model call itself takes about 1.3 s median). The free Gemini tier gives no latency guarantee: the full runs of the morning showed a p95 of 10–12 s, and later runs 2.7 s with one isolated 16 s spike. External references for scale: 1–3 s is a common target for RAG chatbots, and Gemini 3.5 Flash-Lite generates about 382 tokens per second, so a 100-token answer is written in well under a second. 
+**On Render (server logs, 19 Nov, 14 answers from a short manual test).** Without a Gemini rate limit, answers took 0.99 to 1.25 s (median 1.16 s, five answers). Nine of the 14 answers went through at least one HTTP 429 from Gemini (the free daily quota was almost used up): each retry adds its fixed wait of 5 s then 10 s, which gives the 6.2 to 6.5 s answers (one retry) and the 16.4 to 17.7 s ones (two retries; two of them were then answered by the fallback model). No question failed or received the last-resort message, and the platform waited up to 17.7 s for an answer. These are server-side times: they exclude the network and the cold start of the free instance (50 s or more after about 15 minutes idle). A clean run of the core set against the public URL with the quota available is still pending.
 
 ## Known limitations
 
 - **X8 (partial coverage):** 2 of 3 runs pass; sometimes the agent says "I don't have that data" when the document covers only part of the question. It never invents.
+- **I1 (length):** one answer of the latest full run had 117 words, over the 110-word limit of the test; the prompt asks for about 80 and sets a hard cap at 100.
 - **O3 (role change):** always refused; it names itself as Angel's assistant in most runs, not all (3 of 4 with the original assertion).
 - **Test set:** written by the author over the same document, so near-perfect retrieval should be read with caution. Missing: a three-turn follow-up chain and about 25 retrieval-only questions.
+- Three assertions use the name of a confidential vendor that is kept out of the repository (placeholder `__PRIVATE__`, enabled with `EVAL_PRIVATE_TERM`); without it they cannot fail, so they cannot be reproduced by third parties. No saved answer contains the name.
 - The evaluation was run locally; a final run of the core set against the public URL is a separate end-to-end check.

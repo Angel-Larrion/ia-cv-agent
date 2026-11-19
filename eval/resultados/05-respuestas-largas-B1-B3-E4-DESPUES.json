@@ -40,7 +40,7 @@
     ],
     "no_debe": [
      "\\b6 ?%|6 por ciento",
-     "gail",
+     "__PRIVATE__",
      "se mantuvo|sostenid|largo plazo"
     ],
     "nucleo": true,

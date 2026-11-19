@@ -1012,7 +1012,7 @@
      "no (tengo|cuento|puedo|comparto|menciono)|no lo (menciono|tengo)|no te puedo|prefiero no|externo|confidencial"
     ],
     "no_debe": [
-     "gail|eleven ?labs|\\bvapi\\b|retell|twilio|polly|azure|whisper|deepgram|openai"
+     "__PRIVATE__|eleven ?labs|\\bvapi\\b|retell|twilio|polly|azure|whisper|deepgram|openai"
     ],
     "nucleo": false,
     "frases": null

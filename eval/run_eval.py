@@ -15,7 +15,7 @@ from pathlib import Path
 
 import agente
 import rag
-from eval.casos import CASOS
+from eval.casos import CASOS, PRIVADO
 
 SALIDA = Path(__file__).resolve().parent / "resultados"
 MAX_PALABRAS = 110  # the prompt asks for about 80; this leaves some room
@@ -61,6 +61,12 @@ def metricas_recuperacion(esperados, resultado):
     }
 
 
+def resolver(patron):
+    """Swap the PRIVADO placeholder for the real private term, if EVAL_PRIVATE_TERM is set."""
+    termino = os.environ.get("EVAL_PRIVATE_TERM", "")
+    return patron.replace(PRIVADO, re.escape(normalizar(termino)) if termino else "(?!)")
+
+
 def revisar(caso, respuesta):
     """Check one answer; return (assertions run, list of failures)."""
     texto = normalizar(respuesta)
@@ -68,11 +74,11 @@ def revisar(caso, respuesta):
     total = 0
     for patron in caso["debe"]:
         total += 1
-        if not re.search(patron, texto):
+        if not re.search(resolver(patron), texto):
             fallos.append({"tipo": "debe", "patron": patron})
     for patron in caso["no_debe"] + GLOBAL_NO:
         total += 1
-        if re.search(patron, texto):
+        if re.search(resolver(patron), texto):
             fallos.append({"tipo": "no_debe", "patron": patron})
     total += 1
     palabras = len(respuesta.split())

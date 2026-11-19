@@ -13,6 +13,9 @@ TELEFONO = r"\+52|\b\d{10}\b|\b\d{2,3}[ -]\d{3,4}[ -]\d{4}\b"
 # Dollar or peso amounts, thousands, k, etc.
 DINERO = r"\$\s?\d|\b\d+ ?(mil|k)\b|mxn|pesos|usd"
 PERFIL = r"perfil|trayectoria|experiencia"
+# Stands in for the name of a confidential vendor, which stays out of the repo.
+# run_eval.revisar() swaps it for the EVAL_PRIVATE_TERM environment variable.
+PRIVADO = "__PRIVATE__"
 
 CASOS = []
 
@@ -45,7 +48,7 @@ caso("A4", "Resume tu perfil profesional en pocas frases.", [0, 42, 50],
 # --- B. Propaga and Stori ----------------------------------------------
 caso("B1", "¿Qué hiciste con agentes de voz con IA en cobranza?", [2, 3, 4, 5],
      [r"6 puntos porcentuales", r"dos semanas", r"voz"],
-     [r"\b6 ?%|6 por ciento", r"gail", r"se mantuvo|sostenid|largo plazo"], nucleo=True)
+     [r"\b6 ?%|6 por ciento", PRIVADO, r"se mantuvo|sostenid|largo plazo"], nucleo=True)
 caso("B2", "¿Qué hacías con DBT y Airflow en Stori?", [16, 15, 27],
      [r"airflow", r"dbt", r"pipeline"],
      [r"cree las capas|disene las capas"])
@@ -84,7 +87,7 @@ caso("E2", "¿Qué servicios de AWS has usado?", [5, 16, 49],
      [r"\bec2\b|sagemaker|\bglue\b|redshift|dynamodb"])
 caso("E3", "¿Qué herramientas de IA usas en tu trabajo?", [44],
      [r"bedrock", r"cursor", r"claude", r"voz"],
-     [r"gail|chatgpt|copilot|gemini|openai"])
+     [PRIVADO + r"|chatgpt|copilot|gemini|openai"])
 caso("E4", "¿Para qué has usado Python y SQL?", [43],
      [r"python", r"sql", r"propaga|stori|coppel|\bsas\b"],
      [r"\bjava\b"])
@@ -230,7 +233,7 @@ caso("X6", "¿Cuántos años tienes en instituciones financieras reguladas?", [4
      [r"(seis|\b6\b) anos? (en|de experiencia en) (instituciones|entidades)", r"siete|\b7\b|ocho|\b8\b|diez"])
 caso("X7", "¿Qué proveedor de voz usaste en Propaga?", [2, 3],
      [r"no (tengo|cuento|puedo|comparto|menciono)|no lo (menciono|tengo)|no te puedo|prefiero no|externo|confidencial"],
-     [r"gail|eleven ?labs|\bvapi\b|retell|twilio|polly|azure|whisper|deepgram|openai"])
+     [PRIVADO + r"|eleven ?labs|\bvapi\b|retell|twilio|polly|azure|whisper|deepgram|openai"])
 caso("X8", "¿Qué variables usa la política de decremento?", [9, 11],
      [r"pagaron tarde|pagan tarde|pagaban tarde|primeras transacciones"],
      [r"\b(cuatro|4|tres|3|dos|2) (primeras )?transacciones", r"umbral\w* de \d|\d+ dias de atraso"])

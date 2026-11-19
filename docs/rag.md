@@ -4,7 +4,7 @@ This page explains each choice in the retrieval layer (`rag.py`, `scripts/build_
 
 ## Role of RAG
 
-The whole project document would fit in one prompt (about 15,000 tokens). RAG is used as a precision layer: it sends fewer tokens, keeps the model focused and scales if the document grows, and it is measurable with Hit@k and MRR. Because it is only a layer, any retrieval failure falls back to sending all chunks, so the agent still answers.
+The whole project document would fit in one prompt (roughly 9,000 to 10,000 tokens, estimated from the 36 KB file size, not counted with the model's tokenizer). RAG is used as a precision layer: it sends fewer tokens, keeps the model focused and scales if the document grows, and it is measurable with Hit@k and MRR. Because it is only a layer, any retrieval failure falls back to sending all chunks, so the agent still answers.
 
 ## What is indexed and what is not
 
