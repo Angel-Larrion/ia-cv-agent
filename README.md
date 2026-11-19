@@ -79,14 +79,17 @@ Latest full run (one repetition, run locally against the Gemini API):
 
 The 59 / 61 is the saved run re-scored with the current assertions. The summary stored inside that result file says 57 / 61: two assertions (C1, O2) were corrected after reading answers that were in fact right, and the saved answers were re-scored without new generations (table in [docs/evaluation.md](docs/evaluation.md#stored-summaries-versus-re-scored-figures)). The two cases that still fail are X8 (partial coverage, below) and I1 (117 words; the limit is 110).
 
+That run is older than the current code: it was made before the language detector, the bilingual language line, the X8 prompt rule and the API hardening described below. A final full run on the current code is pending, so the table describes the previous version of the agent, not the latest one.
+
 How the agent was optimized, what was tried and the raw result files are in [docs/evaluation.md](docs/evaluation.md) and [eval/resultados/](eval/resultados/README.md).
 
 ## Known limitations
 
 - **Free-tier Gemini:** 500 generations per day and no latency guarantee; occasional spikes of several seconds appear in the p95.
 - **Cold start:** the free Render instance sleeps after inactivity; the first request can take 50 s or more.
-- **Partial coverage (case X8):** when the document answers only part of a question, the agent sometimes says it does not have the data instead of giving the partial answer (2 of 3 runs pass). It does not invent.
+- **Partial coverage (case X8):** when the document answers only part of a question, the agent sometimes says it does not have the data instead of giving the partial answer (it failed in the full run and passed 2 of 3 repeated runs afterwards). It does not invent.
 - **Role-change refusals (case O3):** it always refuses; it states that it is Angel's assistant in most runs, not all.
+- **Not run yet:** the comparison of retrieval against sending every chunk in the prompt (`--todos`), and a run of the core set through the public URL. The evaluation calls `agente.responder()` directly, so it does not exercise HTTP, authentication, rate limiting or streaming; those are covered by the pytest suite and by a short manual test through the client platform.
 - **Length (case I1):** one answer of the latest full run had 117 words, over the 110-word test limit (the prompt asks for about 80).
 - **Latency on Render:** measured only from the server logs of a short manual test through the client platform (14 answers, 19 Nov). Answers with no Gemini rate limit took 1.0 to 1.25 s; the 6 s and 17 s ones are the 5 s and 10 s retry waits after Gemini returned 429 because the free daily quota was almost used up. No answer failed (two were served by the fallback model). A clean run of the core set against the public URL is still pending.
 - **Language:** detection covers English and Spanish; a very short English question with no common English word falls back to the prompt rule.
