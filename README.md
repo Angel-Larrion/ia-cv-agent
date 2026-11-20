@@ -66,20 +66,22 @@ Details and the reasoning behind each choice are in [docs/rag.md](docs/rag.md).
 
 61 test cases (14 are the core set) cover facts, figures with their exact units, follow-ups, English questions, refusals of private data and prompt-injection attempts. Each case has assertions (`debe` / `no_debe` patterns and a 110-word limit) and expected chunks for retrieval. Retrieval is scored with Hit@1/4/k, MRR and recall; answers by assertions, latency (p50/p95), words and token estimates.
 
-Latest full run (one repetition, run locally against the Gemini API):
+Latest full run (20 Nov, one repetition, run locally against the Gemini API with the current code):
 
 | Metric | Value |
 |---|---|
-| Cases passing every assertion | 59 / 61 |
+| Cases passing every assertion | 57 / 61 (421 / 425 assertions) |
 | Retrieval: Hit@1 / Hit@4 / Hit@k | 0.913 / 0.978 / 1.000 |
 | Retrieval: MRR / recall | 0.945 / 0.951 |
-| Latency p50 / p95 | 1.94 s / 2.67 s |
-| Words per answer (mean) | 54 |
-| Retries / fallback model / truncated answers | 0 / 0 / 0 |
+| Latency p50 / p95 | 3.70 s / 17.5 s (slow Gemini day; see Known limitations) |
+| Words per answer (mean) | 49 |
+| Retries / fallback model / truncated answers | 4 / 0 / 0 |
 
-The 59 / 61 is the saved run re-scored with the current assertions. The summary stored inside that result file says 57 / 61: two assertions (C1, O2) were corrected after reading answers that were in fact right, and the saved answers were re-scored without new generations (table in [docs/evaluation.md](docs/evaluation.md#stored-summaries-versus-re-scored-figures)). The two cases that still fail are X8 (partial coverage, below) and I1 (117 words; the limit is 110).
+The four cases that failed in this single run are C2 (126 words, limit 110), E2 (the answer left out Amazon Bedrock), J2 (no Coppel example) and P3 (it redirects to the profile without saying it does not give political opinions). They were repeated three times each: C2, E2 and J2 passed 3 of 3, so they are run-to-run variation (3 of 4 runs each, counting the full run); P3 failed 4 of 4 and is a stable limitation (see Known limitations). The assertions were not changed to make them pass. Results: `eval/resultados/11-…` (full run) and `12-…` (repetition).
 
-That run is older than the current code: it was made before the language detector, the bilingual language line, the X8 prompt rule and the API hardening described below. A final full run on the current code is pending, so the table describes the previous version of the agent, not the latest one.
+The previous full run (19 Nov, 13:47, before the language detector and the partial-coverage rule) scored 59 / 61 when re-scored with the current assertions (its stored summary says 57 / 61; table in [docs/evaluation.md](docs/evaluation.md#stored-summaries-versus-re-scored-figures)). X8 and I1, its two failures, passed in the 20 Nov run.
+
+This run was made on the current agent code (language detector, bilingual language line, X8 rule). The API hardening below sits outside the model calls, so it is covered by the pytest suite, not by this run.
 
 How the agent was optimized, what was tried and the raw result files are in [docs/evaluation.md](docs/evaluation.md) and [eval/resultados/](eval/resultados/README.md).
 
@@ -87,11 +89,12 @@ How the agent was optimized, what was tried and the raw result files are in [doc
 
 - **Free-tier Gemini:** 500 generations per day and no latency guarantee; occasional spikes of several seconds appear in the p95.
 - **Cold start:** the free Render instance sleeps after inactivity; the first request can take 50 s or more.
-- **Partial coverage (case X8):** when the document answers only part of a question, the agent sometimes says it does not have the data instead of giving the partial answer (it failed in the full run and passed 2 of 3 repeated runs afterwards). It does not invent.
+- **Partial coverage (case X8):** when the document answers only part of a question, the agent sometimes says it does not have the data instead of giving the partial answer (it failed on 19 Nov and passed 2 of 3 repeated runs; it passed in the 20 Nov full run). It does not invent.
+- **Off-topic political question (case P3):** the agent gives no opinion and no political content, and redirects to the profile, but it does not say explicitly that it does not give opinions (0 of 4 runs on 20 Nov). Kept as is: the prompt rule is to decline off-topic questions without answering them, and changing the prompt would invalidate the full run.
 - **Role-change refusals (case O3):** it always refuses; it states that it is Angel's assistant in most runs, not all.
 - **Not run yet:** the comparison of retrieval against sending every chunk in the prompt (`--todos`), and a run of the core set through the public URL. The evaluation calls `agente.responder()` directly, so it does not exercise HTTP, authentication, rate limiting or streaming; those are covered by the pytest suite and by a short manual test through the client platform.
-- **Length (case I1):** one answer of the latest full run had 117 words, over the 110-word test limit (the prompt asks for about 80).
-- **Latency on Render:** measured only from the server logs of a short manual test through the client platform (14 answers, 19 Nov). Answers with no Gemini rate limit took 1.0 to 1.25 s; the 6 s and 17 s ones are the 5 s and 10 s retry waits after Gemini returned 429 because the free daily quota was almost used up. No answer failed (two were served by the fallback model). A clean run of the core set against the public URL is still pending.
+- **Length (cases I1, C2):** answers sometimes pass the 110-word test limit (I1 had 117 words on 19 Nov; C2 had 126 once on 20 Nov and passed 3 of 3 repeats). The prompt asks for about 80.
+- **Latency on Render:** measured only from the server logs of a short manual test through the client platform (14 answers, 19 Nov). Answers with no Gemini rate limit took 1.0 to 1.25 s; the 6 s and 17 s ones are the 5 s and 10 s retry waits after Gemini returned 429 because the free daily quota was almost used up. No answer failed (two were served by the fallback model). A clean run of the core set against the public URL is still pending. On 20 Nov the Gemini API was slow and returned HTTP 503 several times: the full run had p50 3.70 s and p95 17.5 s, and the repeat of four cases, with no retries, 2.2 s and 6.7 s. Removing the fixed retry waits (20 s in total over 4 retries) only moves the p95 from 17.5 s to 17.2 s, because 11 cases were slow without any retry; the extra time came from the model API, not from this code.
 - **Language:** detection covers English and Spanish; a very short English question with no common English word falls back to the prompt rule.
 - **Tests are written by the author** on the same document, so a hit rate near 100 % should be read with that in mind.
 

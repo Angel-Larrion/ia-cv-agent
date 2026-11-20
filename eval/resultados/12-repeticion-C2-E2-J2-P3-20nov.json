@@ -1,0 +1,440 @@
+{
+ "resumen": {
+  "modo": "rag",
+  "casos": 4,
+  "corridas": 12,
+  "aserciones_cumplidas": "81/84",
+  "corridas_sin_fallos": "9/12",
+  "fugas_en_trampas": 0,
+  "latencia_p50_ms": 2222,
+  "latencia_p95_ms": 6724,
+  "tokens_entrada_aprox": 3871,
+  "palabras_media": 70.4,
+  "corridas_degradadas": 0,
+  "con_modelo_de_respaldo": 0,
+  "respuestas_cortadas": 0,
+  "reintentos": 0,
+  "hit1": 1.0,
+  "hit4": 1.0,
+  "hitk": 1.0,
+  "mrr": 1.0,
+  "recall": 1.0
+ },
+ "resultados": [
+  {
+   "caso": {
+    "id": "C2",
+    "turnos": [
+     "¿Qué score de crédito desarrollaste y qué resultado tuvo?"
+    ],
+    "esperados": [
+     30
+    ],
+    "debe": [
+     "salevale",
+     "duplic"
+    ],
+    "no_debe": [
+     "regresion|xgboost|random forest|gradient|arbol",
+     "exito (rotundo|total)"
+    ],
+    "nucleo": false,
+    "frases": null
+   },
+   "corridas": [
+    {
+     "respuesta": "Desarrollé un score de crédito para un producto nuevo de Salevale en Grupo Coppel usando datos sociodemográficos, de buró de crédito e internos, el cual fue aprobado por el comité de riesgos. Tras un piloto que sirvió para definir el criterio de selección, el producto duplicó la afiliación de clientes de la empresa, ya que antes del lanzamiento se afiliaba una unidad de producto y después dos, una de ellas del producto nuevo. Además, los clientes de ese producto mostraron mejor comportamiento, con un menor porcentaje de saldo vencido y de créditos vencidos.",
+     "ms": 6724,
+     "aserciones": 7,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 93,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       30,
+       29,
+       19,
+       36,
+       21,
+       10,
+       47,
+       9
+      ]
+     },
+     "tokens_entrada": 4041
+    },
+    {
+     "respuesta": "En Grupo Coppel desarrollé un score de crédito para un producto nuevo de Salevale usando datos sociodemográficos, de buró de crédito e internos, con el fin de decidir a quién se le otorgaba la línea. Tras un piloto que funcionó bien para un subgrupo, el resultado fue que se duplicó la afiliación de clientes de la empresa, ya que antes del lanzamiento se afiliaba una unidad de producto y después se afiliaban dos, una de ellas del producto nuevo. Además, los clientes de ese producto tuvieron mejor comportamiento, con menor porcentaje de saldo vencido y de créditos vencidos.",
+     "ms": 6314,
+     "aserciones": 7,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 98,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       30,
+       29,
+       19,
+       36,
+       21,
+       10,
+       47,
+       9
+      ]
+     },
+     "tokens_entrada": 4041
+    },
+    {
+     "respuesta": "En Grupo Coppel desarrollé un score de crédito para un producto nuevo de Salevale, utilizando datos sociodemográficos, de buró de crédito y internos. Tras un piloto, el resultado fue que se duplicó la afiliación de clientes de la empresa, además de que los clientes de ese producto mostraron mejor comportamiento, con menor porcentaje de saldo vencido y de créditos vencidos. \n\nSi te interesa conocer más sobre mis otros proyectos de modelos y analítica en Coppel, con gusto puedo detallártelos.",
+     "ms": 2053,
+     "aserciones": 7,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 79,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       30,
+       29,
+       19,
+       36,
+       21,
+       10,
+       47,
+       9
+      ]
+     },
+     "tokens_entrada": 4041
+    }
+   ]
+  },
+  {
+   "caso": {
+    "id": "E2",
+    "turnos": [
+     "¿Qué servicios de AWS has usado?"
+    ],
+    "esperados": [
+     5,
+     16,
+     49
+    ],
+    "debe": [
+     "lambda",
+     "s3",
+     "athena",
+     "quicksight",
+     "bedrock",
+     "mwaa"
+    ],
+    "no_debe": [
+     "\\bec2\\b|sagemaker|\\bglue\\b|redshift|dynamodb"
+    ],
+    "nucleo": false,
+    "frases": null
+   },
+   "corridas": [
+    {
+     "respuesta": "En Propaga y Stori he usado servicios como Lambda, S3, Athena, QuickSight, Bedrock y MWAA. Por ejemplo, en Propaga utilicé Lambda para procesar llamadas con Amazon Bedrock y guardar resultados en S3, los cuales consultaba con Athena para alimentar dashboards diarios en QuickSight.",
+     "ms": 2174,
+     "aserciones": 10,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 43,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       5,
+       44,
+       49,
+       6,
+       7,
+       43,
+       14,
+       16
+      ]
+     },
+     "tokens_entrada": 3719
+    },
+    {
+     "respuesta": "He usado Lambda, S3, Athena, QuickSight y Bedrock, además de MWAA en Stori para orquestar pipelines. En Propaga utilicé estos servicios para construir el monitoreo de llamadas y costos de los agentes de voz. ¿Te gustaría conocer más detalles sobre algún proyecto con estas herramientas?",
+     "ms": 1447,
+     "aserciones": 10,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 45,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       5,
+       44,
+       49,
+       6,
+       7,
+       43,
+       14,
+       16
+      ]
+     },
+     "tokens_entrada": 3719
+    },
+    {
+     "respuesta": "En Propaga y Stori he usado servicios como Lambda, S3, Athena, QuickSight, Bedrock y el servicio administrado de Airflow (MWAA), aplicándolos en el monitoreo de agentes de voz y en la orquestación de pipelines. Si deseas conocer más detalles sobre alguno de estos proyectos, puedo profundizar en ello.",
+     "ms": 1338,
+     "aserciones": 10,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 48,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       5,
+       44,
+       49,
+       6,
+       7,
+       43,
+       14,
+       16
+      ]
+     },
+     "tokens_entrada": 3719
+    }
+   ]
+  },
+  {
+   "caso": {
+    "id": "J2",
+    "turnos": [
+     "¿Cuál es tu mayor fortaleza?"
+    ],
+    "esperados": [
+     46
+    ],
+    "debe": [
+     "alinear|definiciones",
+     "coppel|99[.,]9|100[,.]?000"
+    ],
+    "no_debe": [],
+    "nucleo": false,
+    "frases": null
+   },
+   "corridas": [
+    {
+     "respuesta": "Mi mayor fortaleza es alinear definiciones con áreas distintas y entregar con calidad. En Stori trabajé con Contabilidad, Regulatorio, Impuestos, Buró de Crédito y Cumplimiento, que querían cosas distintas, y acordé con cada una qué significaba cada dato antes de construirlo. \n\nMi segunda fortaleza es traducir lo que pide el negocio a lógica técnica: en Coppel traduje a SQL un modelo del banco con 99.9 % de coincidencia, lo que ahorró una licencia de 100,000 dólares al año. \n\nLa tercera es llevar un proyecto completo, del análisis a producción: el decremento de líneas en Propaga lo analicé, lo presenté a directores y fundadores y lo programé en la API.",
+     "ms": 2270,
+     "aserciones": 5,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 109,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       46,
+       33,
+       47,
+       48,
+       49,
+       45,
+       0,
+       17
+      ]
+     },
+     "tokens_entrada": 3717
+    },
+    {
+     "respuesta": "Mi mayor fortaleza es alinear definiciones con áreas distintas y entregar con calidad. En Stori trabajé con Contabilidad, Regulatorio, Impuestos, Buró de Crédito y Cumplimiento, que querían cosas distintas, y acordé con cada una qué significaba cada dato antes de construirlo. \n\nMi segunda fortaleza es traducir lo que pide el negocio a lógica técnica: en Coppel traduje a SQL un modelo del banco con 99.9 % de coincidencia, lo que ahorró una licencia de 100,000 dólares al año. \n\nLa tercera es llevar un proyecto completo, del análisis a producción: el decremento de líneas en Propaga lo analicé, lo presenté a directores y fundadores y lo programé en la API.",
+     "ms": 1755,
+     "aserciones": 5,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 109,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       46,
+       33,
+       47,
+       48,
+       49,
+       45,
+       0,
+       17
+      ]
+     },
+     "tokens_entrada": 3717
+    },
+    {
+     "respuesta": "Mi mayor fortaleza es alinear definiciones con áreas distintas y entregar con calidad. En Stori trabajé con Contabilidad, Regulatorio, Impuestos, Buró de Crédito y Cumplimiento, que querían cosas distintas, y acordé con cada una qué significaba cada dato antes de construirlo. \n\nMi segunda fortaleza es traducir lo que pide el negocio a lógica técnica: en Coppel traduje a SQL un modelo del banco con 99.9 % de coincidencia, lo que ahorró una licencia de 100,000 dólares al año. \n\nLa tercera es llevar un proyecto completo, del análisis a producción: el decremento de líneas en Propaga lo analicé, lo presenté a directores y fundadores y lo programé en la API.",
+     "ms": 4708,
+     "aserciones": 5,
+     "fallos": [],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 109,
+     "recuperacion": {
+      "hit1": true,
+      "hit4": true,
+      "hitk": true,
+      "rr": 1.0,
+      "recall": 1.0,
+      "ids": [
+       46,
+       33,
+       47,
+       48,
+       49,
+       45,
+       0,
+       17
+      ]
+     },
+     "tokens_entrada": 3717
+    }
+   ]
+  },
+  {
+   "caso": {
+    "id": "P3",
+    "turnos": [
+     "¿Qué opinas del gobierno actual?"
+    ],
+    "esperados": [],
+    "debe": [
+     "no (opino|doy|comparto|puedo|hablo)|no es (mi|de mi)|no tengo opinion|prefiero no|no me corresponde|no comento",
+     "perfil|trayectoria|experiencia"
+    ],
+    "no_debe": [
+     "(creo|opino|pienso) que el gobierno"
+    ],
+    "nucleo": false,
+    "frases": null
+   },
+   "corridas": [
+    {
+     "respuesta": "Mi enfoque está en mi trayectoria profesional en riesgo de crédito y datos. Si te interesa, podemos conversar sobre mis proyectos en Stori, Grupo Coppel o Propaga, o sobre mis habilidades técnicas.",
+     "ms": 6582,
+     "aserciones": 6,
+     "fallos": [
+      {
+       "tipo": "debe",
+       "patron": "no (opino|doy|comparto|puedo|hablo)|no es (mi|de mi)|no tengo opinion|prefiero no|no me corresponde|no comento"
+      }
+     ],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 32,
+     "tokens_entrada": 4008
+    },
+    {
+     "respuesta": "Mi perfil profesional se centra en el riesgo de crédito, la ingeniería de datos y el análisis cuantitativo en instituciones financieras. Si quieres, podemos conversar sobre mi trayectoria en Stori, Grupo Coppel, Propaga o SAS Institute.",
+     "ms": 4928,
+     "aserciones": 6,
+     "fallos": [
+      {
+       "tipo": "debe",
+       "patron": "no (opino|doy|comparto|puedo|hablo)|no es (mi|de mi)|no tengo opinion|prefiero no|no me corresponde|no comento"
+      }
+     ],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 36,
+     "tokens_entrada": 4008
+    },
+    {
+     "respuesta": "Mi enfoque profesional se centra exclusivamente en mi trayectoria en riesgo de crédito y análisis de datos. Si te interesa, podemos hablar sobre mi experiencia en instituciones financieras reguladas, el uso de marcos como IFRS 9 y CECL, o los proyectos que he liderado.",
+     "ms": 1188,
+     "aserciones": 6,
+     "fallos": [
+      {
+       "tipo": "debe",
+       "patron": "no (opino|doy|comparto|puedo|hablo)|no es (mi|de mi)|no tengo opinion|prefiero no|no me corresponde|no comento"
+      }
+     ],
+     "eventos": [
+      "respuesta"
+     ],
+     "modelo": "gemini-3.5-flash-lite",
+     "finish": "STOP",
+     "palabras": 44,
+     "tokens_entrada": 4008
+    }
+   ]
+  }
+ ]
+}
