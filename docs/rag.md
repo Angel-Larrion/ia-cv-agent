@@ -4,7 +4,7 @@ This page explains each choice in the retrieval layer (`rag.py`, `scripts/build_
 
 ## Role of RAG
 
-The whole project document would fit in one prompt (roughly 9,000 to 10,000 tokens, estimated from the 36 KB file size, not counted with the model's tokenizer). RAG is used as a precision layer: it sends fewer tokens, keeps the model focused and scales if the document grows, and it is measurable with Hit@k and MRR. Because it is only a layer, any retrieval failure falls back to sending all chunks, so the agent still answers.
+The whole project document would fit in one prompt (roughly 9,000 to 10,000 tokens, estimated from the 36 KB file size, not counted with the model's tokenizer). RAG is used as a precision layer: it sends fewer tokens, keeps the model focused and scales if the document grows, and it is measurable with Hit@k and MRR. This was compared on 20 Nov with `python -m eval.run_eval --todos` (every chunk in the prompt): 59/61 cases clean against 57/61 with retrieval (one repetition each, within run-to-run variation, so no quality advantage is claimed either way), with about 11,400 estimated input tokens per question against about 3,900 (2.9 times more). Latency could not be compared because Gemini was slow in both runs. Retrieval was kept for the token saving, the scaling and the measurability; the result file is `eval/resultados/13-todos-contexto-completo-20nov.json`. Because it is only a layer, any retrieval failure falls back to sending all chunks, so the agent still answers.
 
 ## What is indexed and what is not
 

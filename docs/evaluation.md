@@ -20,8 +20,10 @@ Every result file stores the `resumen` computed with the assertions of that mome
 | `05` | 5/6 | 6/6 | E4 no longer required naming four companies; the prompt asks for the two most relevant |
 | `07` | 23/26 | 24/26 | One assertion corrected |
 | `10` | 57/61 | 59/61 | C1 and O2 corrected; I1 (117 words) and X8 still fail |
+| `11` | 57/61 | 57/61 | No change; C2, E2, J2 and P3 fail |
+| `13` | 59/61 | 59/61 | No change; K3 and P1 fail |
 
-Files `03`, `04`, `08` and `09` give the same figure either way. The criterion: an assertion was changed only after reading the real answer and finding the agent correct, never to make a failing answer pass.
+Files `03`, `04`, `08`, `09`, `11`, `12` and `13` give the same figure either way. The criterion: an assertion was changed only after reading the real answer and finding the agent correct, never to make a failing answer pass.
 
 ## Optimization as a chain of improvements
 
@@ -39,7 +41,10 @@ The real process was not linear (prompt, code and measurement changes were mixed
 | 7b | Language rule, both directions | fixes O1 and O3; X10 still intermittent | 9 of 10 | `08` |
 | 7c | Language detector in code | K1, X9, X10 | 9 of 10 → 9 of 9 | `09` |
 | 8 | Evaluation pause 1 s → 0.1 s | measured p50 | 3.1–3.3 s → 1.94 s (measurement, not an agent improvement) | `02` → `10` |
-| 9 | Latest full run | cases passing every assertion | 59 of 61, p50 1.94 s, p95 2.67 s | `10` |
+| 9 | Full run of 19 Nov, 13:47 (made before the language detector of step 7c; the chain is ordered by topic, not by time) | cases passing every assertion | 59 of 61, p50 1.94 s, p95 2.67 s | `10` |
+| 10 | Final full run, 20 Nov, current code | cases passing every assertion | 57 of 61 (C2, E2, J2, P3); p50 3.70 s, p95 17.5 s (slow Gemini day) | `11` |
+| 11 | Repetition of the four failed cases, 3 times each | stable or variation | C2, E2, J2 3/3; P3 0/3 (stable limitation) | `12` |
+| 12 | Retrieval off (`--todos`): all of `proyectos.md` in the prompt | quality and cost without RAG | 57 → 59 of 61 (within variation); input tokens 3,881 → 11,391 (2.9×); p50 3.70 s both | `13` |
 
 ## Optimization as a matrix of what was measured
 
@@ -56,9 +61,12 @@ Each row is a configuration that was actually tested; cells not measured say so.
 | Language rule, one direction | trap group, 26 | 24/26 | 38.3 | 1.75 / 2.37 | not measured | `07` |
 | Language rule, both directions | K1, O1, O3, P3, X10 × 2 | 9/10 | 45.0 | 1.45 / 1.88 | not measured | `08` |
 | Language detector in code | K1, X9, X10 × 3 | 9/9 | 53.1 | 1.24 / 3.49 | not measured | `09` |
-| Latest full run (before the partial-coverage rule, the bilingual language line and the detector) | 61 × 1 | 59/61 (96.7 %) | 54.2 | 1.94 / 2.67 | 1.000 / .945 / .951 | `10` |
+| Full run of 19 Nov (before the partial-coverage rule, the bilingual language line and the detector) | 61 × 1 | 59/61 (96.7 %) | 54.2 | 1.94 / 2.67 | 1.000 / .945 / .951 | `10` |
+| Final full run, 20 Nov, current code (Gemini slow: 503 errors, 4 retries) | 61 × 1 | 57/61 (93.4 %) | 49.3 | 3.70 / 17.51 | 1.000 / .945 / .951 | `11` |
+| Repetition of C2, E2, J2, P3 (no retries) | 4 × 3 | 9/12 | 70.4 | 2.22 / 6.72 | not measured | `12` |
+| No retrieval, all chunks in the prompt (`--todos`; 3 retries) | 61 × 1 | 59/61 (96.7 %) | 51.9 | 3.70 / 14.70 | not applicable | `13` |
 
-Files are in [`eval/resultados/`](../eval/resultados/README.md) (`01-…` to `10-…`). Two tests have no result file because they only printed to the console: parallel embeddings (1.47 s → 0.74 s, `eval/medir_embeddings.py`) and thinking level (1,293 ms default vs 1,286 ms `minimal`, 0 thinking tokens in both, `eval/probar_pensamiento.py`, 24 generations; only the main model was measured).
+Files are in [`eval/resultados/`](../eval/resultados/README.md) (`01-…` to `13-…`). Two tests have no result file because they only printed to the console: parallel embeddings (1.47 s → 0.74 s, `eval/medir_embeddings.py`) and thinking level (1,293 ms default vs 1,286 ms `minimal`, 0 thinking tokens in both, `eval/probar_pensamiento.py`, 24 generations; only the main model was measured).
 
 Combinations such as "k = 6 with the final prompt" were never run.
 
@@ -67,11 +75,16 @@ Combinations such as "k = 6 with the final prompt" were never run.
 Median about 2 s end to end when run locally against the Gemini API (the model call itself takes about 1.3 s median). The free Gemini tier gives no latency guarantee: the full runs of the morning showed a p95 of 10–12 s, and later runs 2.7 s with one isolated 16 s spike. External references for scale: 1–3 s is a common target for RAG chatbots, and Gemini 3.5 Flash-Lite generates about 382 tokens per second, so a 100-token answer is written in well under a second. 
 **On Render (server logs, 19 Nov, 14 answers from a short manual test).** Without a Gemini rate limit, answers took 0.99 to 1.25 s (median 1.16 s, five answers). Nine of the 14 answers went through at least one HTTP 429 from Gemini (the free daily quota was almost used up): each retry adds its fixed wait of 5 s then 10 s, which gives the 6.2 to 6.5 s answers (one retry) and the 16.4 to 17.7 s ones (two retries; two of them were then answered by the fallback model). No question failed or received the last-resort message, and the platform waited up to 17.7 s for an answer. These are server-side times: they exclude the network and the cold start of the free instance (50 s or more after about 15 minutes idle). A clean run of the core set against the public URL with the quota available is still pending.
 
+Final full run and `--todos` (20 Nov). Latency of the two runs cannot be compared with the morning runs: Gemini returned 503 errors and slow answers (11 cases over 8 s in `11`, most cases from F3 on in `13`). Fixed retry waits were only 20 s in `11` and are not the cause. In `13` the prompt is about 2.9 times longer (11,391 against 3,881 estimated input tokens); with this noise the effect of the longer prompt on latency cannot be separated.
+
 ## Known limitations
 
 - **X8 (partial coverage):** 2 of 3 runs pass; sometimes the agent says "I don't have that data" when the document covers only part of the question. It never invents.
-- **I1 (length):** one answer of the latest full run had 117 words, over the 110-word limit of the test; the prompt asks for about 80 and sets a hard cap at 100.
+- **Length (I1, C2, K3):** some answers pass the 110-word limit of the test (I1 117 words on 19 Nov; C2 126 once and K3 111 once on 20 Nov; the repeats of C2 passed 3 of 3). The prompt asks for about 80 and sets a hard cap at 100.
+- **C2, E2, J2 (run-to-run variation):** each failed once in the 20 Nov full run and passed 3 of 3 when repeated.
+- **P3 (off-topic political question):** redirects to the profile without saying it gives no opinions; 0 of 4 runs on 20 Nov in the RAG mode, passed once in `--todos`. Left as is; the assertion was not loosened.
+- **P1 (code request):** failed once in `--todos` (it redirected without mentioning profile, path or experience); it passed in every RAG run of the final prompt.
 - **O3 (role change):** always refused; it names itself as Angel's assistant in most runs, not all (3 of 4 with the original assertion).
 - **Test set:** written by the author over the same document, so near-perfect retrieval should be read with caution. Missing: a three-turn follow-up chain and about 25 retrieval-only questions.
 - Three assertions use the name of a confidential vendor that is kept out of the repository (placeholder `__PRIVATE__`, enabled with `EVAL_PRIVATE_TERM`); without it they cannot fail, so they cannot be reproduced by third parties. No saved answer contains the name.
-- The evaluation was run locally; a final run of the core set against the public URL is a separate end-to-end check.
+- The evaluation was run locally; a run of the core set against the public URL was not done and is a separate end-to-end check.

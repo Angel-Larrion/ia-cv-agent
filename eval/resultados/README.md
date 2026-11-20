@@ -18,5 +18,6 @@ Ranking, recall and latency columns come from the same files. "n/m" means not me
 | Full verification at 13:47 on 19 Nov (before the X8 prompt rule, the bilingual language line and the language detector; pause 0.1 s) | previous full run | 61 x 1 | 59/61 (96.7 %) | 54.2 | 1.94 / 2.67 | 1.000 / .945 / .951 | `10-verificacion-1347-previa-al-detector.json` |
 | Final full run, 20 Nov, current code (Gemini slow that day: 503 errors, 4 retries) | latest full run | 61 x 1 | 57/61 (93.4 %) | 49.3 | 3.70 / 17.51 | 1.000 / .945 / .951 | `11-corrida-completa-final-20nov.json` |
 | Repetition of the four failed cases (C2, E2, J2, P3), no retries | after | C2, E2, J2, P3 x 3 | 9/12 (C2, E2, J2 3/3; P3 0/3) | 70.4 | 2.22 / 6.72 | n/m (4 cases only) | `12-repeticion-C2-E2-J2-P3-20nov.json` |
+| Retrieval turned off (`--todos`: all of `proyectos.md` in the prompt) | compared with `11` | 61 x 1 | 59/61 (96.7 %) | 51.9 | 3.70 / 14.70 | n/m (no retrieval) | `13-todos-contexto-completo-20nov.json` |
 
 Tested without a result file (console output only, figures in `docs/rag.md`): parallel embeddings (3 sequential vectors 1.47 s, parallel 0.74 s) and model thinking level (default 1,293 ms, `minimal` 1,286 ms, 0 thinking tokens in both).
